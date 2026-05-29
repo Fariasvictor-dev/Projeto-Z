@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gravitação Z — Missão 2: Leis de Kepler</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#04040e;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;font-family:'Share Tech Mono',monospace;color:#c8d8e8;overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);
+  pointer-events:none;z-index:999;
+}
+#bg{position:fixed;inset:0;z-index:0;}
+.container{position:relative;z-index:10;text-align:center;padding:2rem;}
+.mission-badge{
+  font-size:.5rem;letter-spacing:.4em;color:#e5ff00;
+  margin-bottom:1rem;opacity:.7;
+}
+.mission-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(1.4rem,4vw,2.4rem);
+  letter-spacing:.18em;color:#e5ff00;
+  text-shadow:0 0 16px #e5ff00,0 0 36px rgba(229,255,0,.4);
+  margin-bottom:.6rem;
+}
+.mission-sub{font-size:.65rem;letter-spacing:.2em;color:#667700;margin-bottom:2.5rem;}
+.panel{
+  border:1px solid #445500;background:rgba(4,8,0,.9);
+  padding:2rem 2.5rem;display:inline-block;position:relative;
+}
+.coming{
+  font-family:'Press Start 2P',monospace;font-size:.75rem;
+  color:#e5ff00;letter-spacing:.2em;
+  margin-bottom:1.2rem;opacity:.8;
+}
+.desc{font-size:.6rem;color:#4a5a2a;line-height:1.9;margin-bottom:1.8rem;}
+.desc strong{color:#aacc00;}
+.back-link{
+  display:inline-block;
+  font-family:'Press Start 2P',monospace;font-size:.55rem;
+  background:transparent;border:2px solid #667700;
+  color:#aacc00;padding:10px 20px;cursor:pointer;letter-spacing:.12em;
+  text-decoration:none;transition:.2s;
+}
+.back-link:hover{border-color:#e5ff00;color:#e5ff00;box-shadow:0 0 14px rgba(229,255,0,.3);}
+.orbit-hint{
+  margin-top:1.5rem;font-size:.45rem;color:#2a3a10;letter-spacing:.1em;
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="container">
+  <div class="mission-badge">◈ GRAVITAÇÃO Z · MISSÃO 2 ◈</div>
+  <div class="mission-title">LEIS DE KEPLER</div>
+  <div class="mission-sub">AS ÓRBITAS ELÍPTICAS DO COSMOS</div>
+  <div class="panel">
+    <div class="coming">EM DESENVOLVIMENTO...</div>
+    <div class="desc">
+      <strong>Johannes Kepler</strong> aguarda seu desafio.<br>
+      Prove que as órbitas são <strong>elipses</strong>, não círculos.<br>
+      Use a <strong>Luneta de Galileu</strong> para observar<br>
+      os dados e refutar o modelo ptolemaico.<br><br>
+      <span style="color:#334420">· Lei 1: Órbitas elípticas com o Sol no foco<br>
+      · Lei 2: Áreas iguais em tempos iguais<br>
+      · Lei 3: T² ∝ a³</span>
+    </div>
+    <a class="back-link" href="mapa.html">◀ VOLTAR AO MAPA</a>
+    <div class="orbit-hint">MISSÃO DESBLOQUEADA · AGUARDE A PRÓXIMA ATUALIZAÇÃO</div>
+  </div>
+</div>
+<script>
+const c=document.getElementById('bg');
+const x=c.getContext('2d');
+let W,H;
+function rs(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+rs();window.addEventListener('resize',rs);
+const stars=Array.from({length:200},()=>({
+  x:Math.random()*9999,y:Math.random()*9999,r:Math.random()*1.4+.2,
+  t:Math.random()*Math.PI*2,s:Math.random()*.02+.005
+}));
+// planeta elíptico animado
+let tick=0;
+function loop(){
+  tick++;
+  x.fillStyle='#04040e';x.fillRect(0,0,W,H);
+  // nebulosa amarelo-esverdeada
+  const g=x.createRadialGradient(W*.5,H*.5,20,W*.5,H*.5,W*.4);
+  g.addColorStop(0,'rgba(120,160,0,.06)');g.addColorStop(1,'transparent');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  // estrelas
+  stars.forEach(s=>{
+    s.t+=s.s;const a=.15+Math.sin(s.t)*.2;
+    x.fillStyle=`rgba(220,240,180,${a})`;
+    x.beginPath();x.arc(s.x%W,s.y%H,s.r,0,Math.PI*2);x.fill();
+  });
+  // órbita elíptica decorativa
+  x.save();x.translate(W*.5,H*.52);
+  x.strokeStyle='rgba(180,220,0,.07)';x.lineWidth=1;x.setLineDash([4,8]);
+  x.beginPath();x.ellipse(0,0,W*.28,H*.14,0,0,Math.PI*2);x.stroke();
+  x.setLineDash([]);
+  // planeta orbitando
+  const angle=tick*.008;
+  const px=Math.cos(angle)*W*.28,py=Math.sin(angle)*H*.14;
+  const gp=x.createRadialGradient(px-4,py-5,2,px,py,14);
+  gp.addColorStop(0,'#e5ff00');gp.addColorStop(.5,'#aacc00');gp.addColorStop(1,'#445500');
+  x.beginPath();x.arc(px,py,14,0,Math.PI*2);x.fillStyle=gp;x.fill();
+  // sol no foco
+  const sf=x.createRadialGradient(-W*.08,0,4,-W*.08,0,28);
+  sf.addColorStop(0,'rgba(255,220,0,.9)');sf.addColorStop(1,'transparent');
+  x.fillStyle=sf;x.beginPath();x.arc(-W*.08,0,28,0,Math.PI*2);x.fill();
+  x.restore();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

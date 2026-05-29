@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gravitação Z — Mapa</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#04040e;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;
+  font-family:'Share Tech Mono',monospace;
+  color:#c8d8e8;overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);
+  pointer-events:none;z-index:999;
+}
+header{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem}
+header h1{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.35rem;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:#ffe566;text-shadow:0 0 10px #ffe566,0 0 22px #ff9900;
+}
+.badge{font-size:.55rem;letter-spacing:.15em;padding:2px 8px;border:1px solid #00e5ff;color:#00e5ff}
+.canvas-wrapper{position:relative;border:2px solid #1e2a3a;box-shadow:0 0 50px rgba(100,60,220,.18)}
+canvas{display:block}
+.hint{margin-top:8px;font-size:.6rem;color:#4a5a6a;letter-spacing:.1em}
+.back-btn{
+  position:fixed;top:12px;left:14px;
+  font-family:'Press Start 2P',monospace;font-size:.5rem;
+  color:#2a4a6a;text-decoration:none;letter-spacing:.1em;
+  border:1px solid #1a2a3a;padding:5px 10px;
+  z-index:50;transition:.2s;
+}
+.back-btn:hover{color:#00e5ff;border-color:#00e5ff}
+
+/* ── CAIXA DE DIÁLOGO RPG ── */
+#dialogue-overlay{
+  display:none;
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:148px;
+  z-index:25;
+  animation:dlgIn .18s ease;
+}
+@keyframes dlgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#dialogue-overlay.visible{display:block}
+.dlg-frame{position:absolute;inset:0;background:#1a1208;border-top:4px solid #1a1208;}
+.dlg-inner{
+  position:absolute;inset:5px;
+  background:linear-gradient(180deg,#e8d08a 0%,#c8a840 4px,#f5e6b0 4px,#f0dea0 100%);
+  border:3px solid #8b6914;
+  box-shadow:inset 0 0 0 2px #f5e8b8, inset 0 0 0 4px #a07820;
+  display:flex;align-items:stretch;
+}
+.dlg-inner::before,.dlg-inner::after{content:'◆';position:absolute;font-size:14px;color:#8b6914;line-height:1;top:4px;}
+.dlg-inner::before{left:6px} .dlg-inner::after{right:6px}
+.dlg-avatar-wrap{width:110px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px 8px 0;position:relative;}
+#avatar-canvas{width:90px;height:90px;image-rendering:pixelated;border:3px solid #8b6914;background:#0a0814;box-shadow:inset 0 0 8px rgba(0,0,0,.6),0 0 0 2px #c8a840;}
+.dlg-avatar-name{font-family:'Press Start 2P',monospace;font-size:5.5px;color:#3a2200;margin-top:4px;text-align:center;max-width:90px;word-break:break-all;}
+.dlg-sep{width:4px;background:repeating-linear-gradient(180deg,#8b6914 0,#8b6914 4px,#c8a840 4px,#c8a840 8px);margin:8px 0;flex-shrink:0;}
+.dlg-text-area{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 16px 10px 12px;position:relative;}
+.dlg-speaker-bar{display:inline-block;background:#1a0c00;border:2px solid #8b6914;box-shadow:2px 2px 0 #3a2200;padding:3px 12px 3px 8px;margin-bottom:8px;align-self:flex-start;}
+.dlg-speaker-name{font-family:'Press Start 2P',monospace;font-size:8px;color:#ffe566;text-shadow:1px 1px 0 #884400,0 0 8px rgba(255,180,0,.5);letter-spacing:.12em;}
+#speaker-message{font-family:'Press Start 2P',monospace;font-size:7.5px;line-height:1.85;color:#1a0c00;text-shadow:.5px .5px 0 rgba(255,255,255,.3);}
+.dlg-arrow{position:absolute;bottom:8px;right:14px;font-size:12px;color:#8b4500;animation:arrowBlink 1s steps(1) infinite;}
+@keyframes arrowBlink{50%{opacity:0}}
+.dlg-avatar-right{width:110px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px 8px 0;}
+#avatar-canvas-r{width:90px;height:90px;image-rendering:pixelated;border:3px solid #8b6914;background:#0a0814;box-shadow:inset 0 0 8px rgba(0,0,0,.6),0 0 0 2px #c8a840;}
+.dlg-avatar-name-r{font-family:'Press Start 2P',monospace;font-size:5.5px;color:#3a2200;margin-top:4px;text-align:center;max-width:90px;word-break:break-all;}
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="index.html">◀ MENU</a>
+
+<header>
+  <h1>GRAVITAÇÃO Z</h1>
+  <span class="badge">MAPA ESTELAR</span>
+</header>
+
+<div class="canvas-wrapper">
+  <canvas id="gameCanvas" width="800" height="550"></canvas>
+
+  <div id="dialogue-overlay">
+    <div class="dlg-frame">
+      <div class="dlg-inner">
+        <div class="dlg-avatar-wrap">
+          <canvas id="avatar-canvas" width="90" height="90"></canvas>
+          <div class="dlg-avatar-name" id="avatar-name-l"></div>
+        </div>
+        <div class="dlg-sep"></div>
+        <div class="dlg-text-area">
+          <div class="dlg-speaker-bar">
+            <span class="dlg-speaker-name" id="speaker-name">—</span>
+          </div>
+          <div id="speaker-message"></div>
+          <div class="dlg-arrow">▼</div>
+        </div>
+        <div class="dlg-sep"></div>
+        <div class="dlg-avatar-right">
+          <canvas id="avatar-canvas-r" width="90" height="90"></canvas>
+          <div class="dlg-avatar-name-r" id="avatar-name-r"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="hint" id="hint-bar">SETAS: Mover · ENTER: Interagir com missão</p>
+
+<script src="shared.js"></script>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+let estadoJogo = "MAPA";
+let estadoAnteriorDialogo = "MAPA";
+
+let progresso = carregarProgresso();
+
+// ── MISSÕES ────────────────────────────────────────────
+const MISSIONS = [
+  { id:1, x:185, y:285, label:'MISSÃO 1', sub:'A GRANDE DISPUTA',
+    color:'#44eebb', glow:'rgba(68,238,187,.6)',
+    pColors:['#1a6655','#44eebb','#2af4c0','#0a9977'], ringCol:'rgba(68,238,187,.38)', orbitCol:'rgba(68,238,187,.15)',
+    file:'fase1.html' },
+  { id:2, x:445, y:205, label:'MISSÃO 2', sub:'LEIS DE KEPLER',
+    color:'#e5ff00', glow:'rgba(229,255,0,.45)',
+    pColors:['#445500','#aacc00','#e5ff00','#667700'], ringCol:'rgba(229,255,0,.28)', orbitCol:'rgba(229,255,0,.12)',
+    file:'fase2.html' },
+  { id:3, x:665, y:335, label:'MISSÃO 3', sub:'A MAÇÃ DE NEWTON',
+    color:'#ff4081', glow:'rgba(255,64,129,.45)',
+    pColors:['#550022','#aa0044','#ff4081','#660033'], ringCol:'rgba(255,64,129,.28)', orbitCol:'rgba(255,64,129,.12)',
+    file:'fase3.html' },
+];
+
+// ── PLAYER ─────────────────────────────────────────────
+const player = {
+  x:MISSIONS[0].x, y:MISSIONS[0].y+70,
+  vx:0, vy:0, speed:2.8,
+  facing:1, frame:0, frameTimer:0, nearMission:null
+};
+
+const keys={};
+window.addEventListener('keydown',e=>{
+  keys[e.key]=true;
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  if(estadoJogo==="DIALOGO"&&(e.key===' '||e.key==='Enter')){ indiceScript++; atualizarDlg(); return; }
+  if(estadoJogo==="MAPA"&&e.key==='Enter'&&player.nearMission!==null) iniciarMissao(player.nearMission);
+});
+window.addEventListener('keyup',e=>{keys[e.key]=false;});
+
+// ── DIÁLOGO ────────────────────────────────────────────
+let scriptAtual=[],indiceScript=0,acaoPos=null,dlgOuvinte=null;
+
+function atualizarDlg(){
+  const ov=document.getElementById('dialogue-overlay');
+  if(indiceScript<scriptAtual.length){
+    const f=scriptAtual[indiceScript];
+    ov.classList.add('visible');
+    document.getElementById('speaker-name').textContent=f.quem;
+    document.getElementById('speaker-message').textContent=f.texto;
+    desenharAvatarCanvas(document.getElementById('avatar-canvas'),f.quem);
+    document.getElementById('avatar-name-l').textContent=f.quem;
+    const ouvinte=f.ouvinte||dlgOuvinte;
+    if(ouvinte){
+      desenharAvatarCanvas(document.getElementById('avatar-canvas-r'),ouvinte);
+      document.getElementById('avatar-name-r').textContent=ouvinte;
+    } else {
+      document.getElementById('avatar-canvas-r').getContext('2d').clearRect(0,0,90,90);
+      document.getElementById('avatar-name-r').textContent='';
+    }
+  } else {
+    ov.classList.remove('visible');
+    estadoJogo=estadoAnteriorDialogo;
+    const cb=acaoPos; acaoPos=null;
+    if(cb) cb();
+  }
+}
+
+function dispararHistoria(falas,callback,ouvinte){
+  scriptAtual=falas; indiceScript=0; acaoPos=callback; dlgOuvinte=ouvinte||null;
+  if(estadoJogo!=="DIALOGO") estadoAnteriorDialogo=estadoJogo;
+  estadoJogo="DIALOGO";
+  atualizarDlg();
+}
+
+// ── AMBIENTE ───────────────────────────────────────────
+const STARS = criarStars(W, H);
+const nbCanvas = criarNebulas(W, H);
+
+// ── DESENHO PLANETAS ───────────────────────────────────
+function lightenHex(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  return`rgb(${Math.min(255,((n>>16)&255)+amt)},${Math.min(255,((n>>8)&255)+amt)},${Math.min(255,(n&255)+amt)})`;
+}
+
+function drawLock(x,y,size,color){
+  const hw=size*.38,hh=size*.28,bw=size*.55,bh=size*.42;
+  ctx.strokeStyle=color;ctx.lineWidth=size*.12;
+  ctx.beginPath();ctx.arc(x,y-hh*.5,hw,Math.PI,0);ctx.stroke();
+  ctx.fillStyle=color;ctx.fillRect(x-bw/2,y-hh*.2,bw,bh);
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(x,y+bh*.15,bw*.13,0,Math.PI*2);ctx.fill();
+  ctx.fillRect(x-bw*.06,y+bh*.15,bw*.12,bh*.25);
+}
+
+function desenharPlaneta(m,idx,t){
+  const unlocked=(idx===0)||(idx===1&&progresso.missao2_unlocked)||(idx===2&&progresso.missao3_unlocked);
+  const {x,y,color,glow,pColors,ringCol,orbitCol}=m;
+  const pulse=Math.sin(t*.04+idx)*.5+.5;
+  const R=36;
+  ctx.save();ctx.strokeStyle=orbitCol;ctx.lineWidth=1;ctx.setLineDash([4,6]);
+  ctx.beginPath();ctx.ellipse(x,y,R+26,9,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+  if(unlocked){
+    const g2=ctx.createRadialGradient(x,y,R*.3,x,y,R*2.4);
+    g2.addColorStop(0,glow);g2.addColorStop(1,'transparent');
+    ctx.fillStyle=g2;ctx.beginPath();ctx.arc(x,y,R*2.4,0,Math.PI*2);ctx.fill();
+  }
+  const sphere=ctx.createRadialGradient(x-10,y-12,3,x,y,R);
+  sphere.addColorStop(0,unlocked?lightenHex(pColors[2],40):'#556677');
+  sphere.addColorStop(.5,unlocked?pColors[1]:'#33445a');
+  sphere.addColorStop(1,unlocked?pColors[0]:'#1a2233');
+  ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=sphere;ctx.fill();
+  if(unlocked){
+    ctx.save();ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.clip();
+    for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(x,y-6+i*9,R*.88,3.5,.2,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.1)';ctx.fill();}
+    ctx.restore();
+  }
+  ctx.beginPath();ctx.arc(x-11,y-13,R*.33,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,.12)';ctx.fill();
+  ctx.save();ctx.translate(x,y);ctx.scale(1,.28);ctx.rotate(.3);
+  ctx.beginPath();ctx.arc(0,0,R+17,0,Math.PI*2);
+  ctx.strokeStyle=unlocked?ringCol:'rgba(80,80,110,.18)';ctx.lineWidth=7;ctx.stroke();
+  ctx.restore();
+  if(!unlocked){
+    ctx.save();ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fill();
+    drawLock(x,y,22,'rgba(150,150,210,.75)');ctx.restore();
+  }
+  ctx.save();
+  if(unlocked){ctx.shadowColor=color;ctx.shadowBlur=8;}
+  ctx.font="8.5px 'Press Start 2P'";ctx.fillStyle=unlocked?color:'#556677';ctx.textAlign='center';
+  ctx.fillText(m.label,x,y+R+20);ctx.restore();
+  ctx.font="11px 'Share Tech Mono'";ctx.fillStyle=unlocked?'rgba(200,255,240,.5)':'rgba(100,110,140,.5)';ctx.textAlign='center';
+  ctx.fillText(unlocked?m.sub:'🔒 BLOQUEADO',x,y+R+34);
+  if(unlocked){
+    ctx.beginPath();ctx.arc(x,y,R+5+pulse*9,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(${color==='#44eebb'?'68,238,187':color==='#e5ff00'?'229,255,0':'255,64,129'},${.14-pulse*.11})`;
+    ctx.lineWidth=2;ctx.stroke();
+  }
+}
+
+// ── DESENHO ASTRONAUTA ─────────────────────────────────
+function desenharAstronauta(px_,py_,facing,frame,t){
+  const S=2.4;
+  const ox=px_,oy=py_;
+  ctx.save();ctx.translate(ox,oy);if(facing<0)ctx.scale(-1,1);
+  const bob=Math.sin(t*.08)*.5;
+  const legS=frame===1?1:0;
+  function r(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x*S,(y+bob)*S,w*S,h*S);}
+  ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(0,11*S+bob*S,7*S,2.5*S,0,0,Math.PI*2);ctx.fill();
+  r(-3,0,6,2,'#ffe566');
+  r(-4,2,8,8,'#2255dd');
+  r(-5,3,2,5,'#1133aa');r(3,3,2,5,'#1133aa');
+  r(-3,-5,6,6,'#ccddff');r(-3,-5,6,1,'#8899ff');r(-3,-1,6,1,'#8899ff');
+  r(-2,-4,4,3,'rgba(160,210,255,.72)');r(-1,-4,1,1,'rgba(255,255,255,.6)');
+  r(3,3,3,4,'#1144bb');
+  if(legS){r(-3,10,2,5,'#dd3322');r(1,10,2,3,'#dd3322');r(-3,15,2,2,'#eeddaa');r(1,13,2,2,'#eeddaa');}
+  else{r(-3,10,2,4,'#dd3322');r(1,10,2,5,'#dd3322');r(-3,14,2,2,'#eeddaa');r(1,15,2,2,'#eeddaa');}
+  r(-4,9,8,1.5,'#ffaa00');
+  r(1,-7,1,3,'#aabbff');r(1,-8,1,1,'#ff4488');
+  ctx.restore();
+  const aura=ctx.createRadialGradient(ox,oy+4,2,ox,oy+4,22);
+  aura.addColorStop(0,'rgba(100,180,255,.14)');aura.addColorStop(1,'transparent');
+  ctx.fillStyle=aura;ctx.beginPath();ctx.arc(ox,oy+4,22,0,Math.PI*2);ctx.fill();
+}
+
+// ── DESENHO MAPA ───────────────────────────────────────
+function desenharMapa(t){
+  ctx.drawImage(nbCanvas,0,0);
+  STARS.forEach(s=>{
+    s.twinkleOffset+=s.twinkleSpeed;
+    const a=.3+Math.sin(s.twinkleOffset)*.38;
+    ctx.fillStyle=`rgba(200,220,255,${a})`;
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();
+  });
+  ctx.save();ctx.setLineDash([6,10]);ctx.strokeStyle='rgba(255,255,200,.1)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(MISSIONS[0].x,MISSIONS[0].y);ctx.lineTo(MISSIONS[1].x,MISSIONS[1].y);ctx.lineTo(MISSIONS[2].x,MISSIONS[2].y);ctx.stroke();
+  [[MISSIONS[0],MISSIONS[1]],[MISSIONS[1],MISSIONS[2]]].forEach(([a,b])=>{
+    for(let i=1;i<6;i++){const p=i/6;ctx.beginPath();ctx.arc(a.x+(b.x-a.x)*p,a.y+(b.y-a.y)*p,2.5,0,Math.PI*2);ctx.fillStyle='rgba(255,255,200,.18)';ctx.fill();}
+  });
+  ctx.restore();
+  MISSIONS.forEach((m,idx)=>desenharPlaneta(m,idx,t));
+  if(player.nearMission!==null){
+    const m=MISSIONS[player.nearMission];
+    const ul=(player.nearMission===0)||(player.nearMission===1&&progresso.missao2_unlocked)||(player.nearMission===2&&progresso.missao3_unlocked);
+    const pulse=.6+Math.sin(t*.12)*.4;
+    ctx.save();ctx.globalAlpha=pulse;
+    ctx.font="7.5px 'Press Start 2P'";ctx.fillStyle=ul?'#ffe566':'#ff5566';ctx.textAlign='center';
+    ctx.fillText(ul?'[ ENTER ]':'🔒 BLOQUEADO',m.x,m.y-68);ctx.restore();
+  }
+  desenharAstronauta(player.x,player.y-20,player.facing,player.frame,t);
+  if(progresso.tem_luneta){
+    ctx.font="8px 'Share Tech Mono'";ctx.fillStyle='rgba(0,229,255,.5)';ctx.textAlign='left';
+    ctx.fillText('🔭 LUNETA DE GALILEU',10,H-8);
+  }
+  ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;ctx.strokeRect(0,0,W,H);
+}
+
+// ── INTERAÇÃO ──────────────────────────────────────────
+function iniciarMissao(idx){
+  if(idx===0&&progresso.missao1_unlocked){
+    dispararHistoria([
+      {quem:"NARRADOR",ouvinte:"ARISTÓTELES",texto:"Você pousa na Grécia Antiga, coração do pensamento clássico. Uma figura imponente bloqueia seu caminho ao cosmos."},
+      {quem:"ARISTÓTELES",ouvinte:"JOGADOR",texto:"Alto lá! Eu sou Aristóteles. A Terra é o centro IMÓVEL e PERFEITO do universo. O Geocentrismo é a ORDEM NATURAL das esferas celestes!"},
+      {quem:"JOGADOR",ouvinte:"ARISTÓTELES",texto:"Mas as observações mostram outra realidade! O retrógrado de Marte, as fases de Vênus... seus círculos não explicam os dados!"},
+      {quem:"ARISTÓTELES",ouvinte:"JOGADOR",texto:"Ousado, herético! Se quer atravessar meu domínio, terá que me vencer em combate científico. EN GARDE!"},
+    ],()=>{ window.location.href='fase1.html'; },"JOGADOR");
+  } else if(idx===1){
+    if(!progresso.missao2_unlocked)
+      dispararHistoria([{quem:"SISTEMA",ouvinte:"JOGADOR",texto:"Caminho bloqueado. Complete a Missão 1 primeiro para desbloquear as Leis de Kepler."}],null,"JOGADOR");
+    else {
+      dispararHistoria([
+        {quem:"NARRADOR",ouvinte:"JOGADOR",texto:"Missão 2 — Leis de Kepler. Em breve disponível!"},
+      ],null,"JOGADOR");
+    }
+  } else if(idx===2){
+    if(!progresso.missao3_unlocked)
+      dispararHistoria([{quem:"SISTEMA",ouvinte:"JOGADOR",texto:"Complete as missões anteriores para desbloquear A Maçã de Newton."}],null,"JOGADOR");
+    else {
+      dispararHistoria([
+        {quem:"NARRADOR",ouvinte:"JOGADOR",texto:"Missão 3 — A Maçã de Newton. Em breve disponível!"},
+      ],null,"JOGADOR");
+    }
+  }
+}
+
+// ── LOOP PRINCIPAL ─────────────────────────────────────
+let ticks=0;
+function loop(){
+  ticks++;
+  ctx.fillStyle='#04040e';ctx.fillRect(0,0,W,H);
+  if(estadoJogo==="MAPA"||estadoJogo==="DIALOGO"){
+    if(estadoJogo==="MAPA"){
+      player.vx=0;player.vy=0;
+      if(keys['ArrowLeft']){player.vx=-player.speed;player.facing=-1;}
+      if(keys['ArrowRight']){player.vx=player.speed;player.facing=1;}
+      if(keys['ArrowUp'])   player.vy=-player.speed;
+      if(keys['ArrowDown']) player.vy=player.speed;
+      if(player.vx&&player.vy){player.vx*=.707;player.vy*=.707;}
+      player.x+=player.vx;player.y+=player.vy;
+      player.x=Math.max(20,Math.min(W-20,player.x));
+      player.y=Math.max(20,Math.min(H-20,player.y));
+      if(player.vx||player.vy){player.frameTimer++;if(player.frameTimer>8){player.frame^=1;player.frameTimer=0;}}else player.frame=0;
+      player.nearMission=null;
+      MISSIONS.forEach((m,i)=>{if(Math.sqrt((player.x-m.x)**2+(player.y-m.y)**2)<52)player.nearMission=i;});
+    }
+    desenharMapa(ticks);
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

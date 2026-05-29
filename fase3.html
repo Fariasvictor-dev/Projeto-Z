@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gravitação Z — Missão 3: A Maçã de Newton</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#04040e;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;font-family:'Share Tech Mono',monospace;color:#c8d8e8;overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);
+  pointer-events:none;z-index:999;
+}
+#bg{position:fixed;inset:0;z-index:0;}
+.container{position:relative;z-index:10;text-align:center;padding:2rem;}
+.mission-badge{font-size:.5rem;letter-spacing:.4em;color:#ff4081;margin-bottom:1rem;opacity:.7;}
+.mission-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(1.4rem,4vw,2.4rem);
+  letter-spacing:.18em;color:#ff4081;
+  text-shadow:0 0 16px #ff4081,0 0 36px rgba(255,64,129,.4);
+  margin-bottom:.6rem;
+}
+.mission-sub{font-size:.65rem;letter-spacing:.2em;color:#660033;margin-bottom:2.5rem;}
+.panel{
+  border:1px solid #550022;background:rgba(8,0,4,.9);
+  padding:2rem 2.5rem;display:inline-block;
+}
+.coming{font-family:'Press Start 2P',monospace;font-size:.75rem;color:#ff4081;letter-spacing:.2em;margin-bottom:1.2rem;opacity:.8;}
+.desc{font-size:.6rem;color:#4a2030;line-height:1.9;margin-bottom:1.8rem;}
+.desc strong{color:#aa0044;}
+.back-link{
+  display:inline-block;font-family:'Press Start 2P',monospace;font-size:.55rem;
+  background:transparent;border:2px solid #660033;
+  color:#aa0044;padding:10px 20px;cursor:pointer;letter-spacing:.12em;
+  text-decoration:none;transition:.2s;
+}
+.back-link:hover{border-color:#ff4081;color:#ff4081;box-shadow:0 0 14px rgba(255,64,129,.3);}
+.orbit-hint{margin-top:1.5rem;font-size:.45rem;color:#2a1018;letter-spacing:.1em;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="container">
+  <div class="mission-badge">◈ GRAVITAÇÃO Z · MISSÃO 3 ◈</div>
+  <div class="mission-title">A MAÇÃ DE NEWTON</div>
+  <div class="mission-sub">A LEI DA GRAVITAÇÃO UNIVERSAL</div>
+  <div class="panel">
+    <div class="coming">EM DESENVOLVIMENTO...</div>
+    <div class="desc">
+      <strong>Isaac Newton</strong> e sua maçã fatídica.<br>
+      Descubra a <strong>Lei da Gravitação Universal</strong><br>
+      e prove que a mesma força que derruba<br>
+      a maçã mantém a Lua em órbita.<br><br>
+      <span style="color:#330011">· F = G·M·m / r²<br>
+      · Unificação: gravidade terrestre e celeste<br>
+      · A síntese final da Revolução Científica</span>
+    </div>
+    <a class="back-link" href="mapa.html">◀ VOLTAR AO MAPA</a>
+    <div class="orbit-hint">MISSÃO BLOQUEADA · COMPLETE AS MISSÕES ANTERIORES</div>
+  </div>
+</div>
+<script>
+const c=document.getElementById('bg');
+const x=c.getContext('2d');
+let W,H;
+function rs(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+rs();window.addEventListener('resize',rs);
+const stars=Array.from({length:200},()=>({
+  x:Math.random()*9999,y:Math.random()*9999,r:Math.random()*1.4+.2,
+  t:Math.random()*Math.PI*2,s:Math.random()*.02+.005
+}));
+// maçã caindo (animação)
+let tick=0;
+const apples=[];
+function spawnApple(){
+  if(Math.random()<.008) apples.push({x:W*(.3+Math.random()*.4),y:-20,vy:.8+Math.random()*.6,life:1});
+}
+function loop(){
+  tick++;
+  x.fillStyle='#04040e';x.fillRect(0,0,W,H);
+  // nebulosa rosa-avermelhada
+  const g=x.createRadialGradient(W*.5,H*.4,20,W*.5,H*.4,W*.4);
+  g.addColorStop(0,'rgba(160,0,60,.07)');g.addColorStop(1,'transparent');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  // estrelas
+  stars.forEach(s=>{
+    s.t+=s.s;const a=.15+Math.sin(s.t)*.2;
+    x.fillStyle=`rgba(255,180,200,${a})`;
+    x.beginPath();x.arc(s.x%W,s.y%H,s.r,0,Math.PI*2);x.fill();
+  });
+  // maçãs caindo
+  spawnApple();
+  for(let i=apples.length-1;i>=0;i--){
+    const a=apples[i];
+    a.vy+=.04; a.y+=a.vy;
+    x.save();x.globalAlpha=.7;
+    // corpo da maçã
+    const ag=x.createRadialGradient(a.x-3,a.y-4,2,a.x,a.y,11);
+    ag.addColorStop(0,'#ff6688');ag.addColorStop(1,'#880022');
+    x.fillStyle=ag;x.beginPath();x.arc(a.x,a.y,11,0,Math.PI*2);x.fill();
+    // brilho
+    x.fillStyle='rgba(255,255,255,.2)';x.beginPath();x.arc(a.x-3,a.y-4,4,0,Math.PI*2);x.fill();
+    // cabo
+    x.strokeStyle='#336600';x.lineWidth=2;x.beginPath();x.moveTo(a.x,a.y-11);x.lineTo(a.x+4,a.y-18);x.stroke();
+    x.restore();
+    if(a.y>H+20) apples.splice(i,1);
+  }
+  // terra no fundo (arco)
+  const tg=x.createLinearGradient(0,H*.78,0,H);
+  tg.addColorStop(0,'#0a1a0a');tg.addColorStop(1,'#040a04');
+  x.fillStyle=tg;x.beginPath();x.ellipse(W*.5,H+60,W*.6,120,0,Math.PI,0);x.fill();
+  x.strokeStyle='rgba(68,170,68,.1)';x.lineWidth=1;
+  x.beginPath();x.ellipse(W*.5,H+60,W*.6,120,0,Math.PI,0);x.stroke();
+  // linhas de força gravitacional
+  if(tick%60===0) apples.push({x:W*.5,y:H*.35,vy:1.2,life:1});
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>

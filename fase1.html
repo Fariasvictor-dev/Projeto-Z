@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gravitação Z — Missão 1: A Grande Disputa</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#04040e;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;
+  font-family:'Share Tech Mono',monospace;
+  color:#c8d8e8;overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);
+  pointer-events:none;z-index:999;
+}
+header{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem}
+header h1{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.35rem;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:#ffe566;text-shadow:0 0 10px #ffe566,0 0 22px #ff9900;
+}
+.badge{font-size:.55rem;letter-spacing:.15em;padding:2px 8px;border:1px solid #44eebb;color:#44eebb}
+.canvas-wrapper{position:relative;border:2px solid #1e2a3a;box-shadow:0 0 50px rgba(100,60,220,.18)}
+canvas{display:block}
+.hint{margin-top:8px;font-size:.6rem;color:#4a5a6a;letter-spacing:.1em}
+.back-btn{
+  position:fixed;top:12px;left:14px;
+  font-family:'Press Start 2P',monospace;font-size:.5rem;
+  color:#2a4a6a;text-decoration:none;letter-spacing:.1em;
+  border:1px solid #1a2a3a;padding:5px 10px;
+  z-index:50;transition:.2s;
+}
+.back-btn:hover{color:#00e5ff;border-color:#00e5ff}
+
+/* ── CAIXA DE DIÁLOGO RPG ── */
+#dialogue-overlay{
+  display:none;position:absolute;
+  bottom:0;left:0;right:0;height:148px;
+  z-index:25;animation:dlgIn .18s ease;
+}
+@keyframes dlgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#dialogue-overlay.visible{display:block}
+.dlg-frame{position:absolute;inset:0;background:#1a1208;border-top:4px solid #1a1208;}
+.dlg-inner{
+  position:absolute;inset:5px;
+  background:linear-gradient(180deg,#e8d08a 0%,#c8a840 4px,#f5e6b0 4px,#f0dea0 100%);
+  border:3px solid #8b6914;
+  box-shadow:inset 0 0 0 2px #f5e8b8,inset 0 0 0 4px #a07820;
+  display:flex;align-items:stretch;
+}
+.dlg-inner::before,.dlg-inner::after{content:'◆';position:absolute;font-size:14px;color:#8b6914;line-height:1;top:4px;}
+.dlg-inner::before{left:6px}.dlg-inner::after{right:6px}
+.dlg-avatar-wrap{width:110px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px 8px 0;}
+#avatar-canvas{width:90px;height:90px;image-rendering:pixelated;border:3px solid #8b6914;background:#0a0814;box-shadow:inset 0 0 8px rgba(0,0,0,.6),0 0 0 2px #c8a840;}
+.dlg-avatar-name{font-family:'Press Start 2P',monospace;font-size:5.5px;color:#3a2200;margin-top:4px;text-align:center;max-width:90px;word-break:break-all;}
+.dlg-sep{width:4px;background:repeating-linear-gradient(180deg,#8b6914 0,#8b6914 4px,#c8a840 4px,#c8a840 8px);margin:8px 0;flex-shrink:0;}
+.dlg-text-area{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 16px 10px 12px;position:relative;}
+.dlg-speaker-bar{display:inline-block;background:#1a0c00;border:2px solid #8b6914;box-shadow:2px 2px 0 #3a2200;padding:3px 12px 3px 8px;margin-bottom:8px;align-self:flex-start;}
+.dlg-speaker-name{font-family:'Press Start 2P',monospace;font-size:8px;color:#ffe566;text-shadow:1px 1px 0 #884400,0 0 8px rgba(255,180,0,.5);letter-spacing:.12em;}
+#speaker-message{font-family:'Press Start 2P',monospace;font-size:7.5px;line-height:1.85;color:#1a0c00;text-shadow:.5px .5px 0 rgba(255,255,255,.3);}
+.dlg-arrow{position:absolute;bottom:8px;right:14px;font-size:12px;color:#8b4500;animation:arrowBlink 1s steps(1) infinite;}
+@keyframes arrowBlink{50%{opacity:0}}
+.dlg-avatar-right{width:110px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px 8px 0;}
+#avatar-canvas-r{width:90px;height:90px;image-rendering:pixelated;border:3px solid #8b6914;background:#0a0814;box-shadow:inset 0 0 8px rgba(0,0,0,.6),0 0 0 2px #c8a840;}
+.dlg-avatar-name-r{font-family:'Press Start 2P',monospace;font-size:5.5px;color:#3a2200;margin-top:4px;text-align:center;max-width:90px;word-break:break-all;}
+
+/* ── BANNER VITÓRIA ── */
+#victory-banner{
+  position:absolute;inset:0;background:rgba(0,0,0,.85);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;z-index:40;
+}
+#victory-banner.visible{display:flex;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.victory-inner{
+  border:3px solid #ffe566;background:rgba(8,8,22,.98);
+  padding:30px 44px;text-align:center;
+  box-shadow:0 0 40px rgba(255,229,100,.25),inset 0 0 30px rgba(0,0,0,.5);
+}
+.victory-title{
+  font-family:'Orbitron',sans-serif;font-size:1.15rem;
+  color:#ffe566;text-shadow:0 0 20px #ff9900;
+  letter-spacing:.25em;margin-bottom:14px;
+}
+.victory-item{font-size:.72rem;color:#00e5ff;line-height:1.75;margin-bottom:20px}
+.victory-btn{
+  font-family:'Press Start 2P',monospace;font-size:.6rem;
+  background:transparent;border:2px solid #ffe566;
+  color:#ffe566;padding:10px 22px;cursor:pointer;letter-spacing:.15em;transition:.2s;
+}
+.victory-btn:hover{background:rgba(255,229,100,.12);box-shadow:0 0 12px rgba(255,229,100,.4)}
+
+/* ── BANNER DERROTA ── */
+#defeat-banner{
+  position:absolute;inset:0;background:rgba(0,0,0,.9);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;z-index:40;
+}
+#defeat-banner.visible{display:flex;animation:fadeIn .4s ease}
+.defeat-inner{
+  border:3px solid #ff4081;background:rgba(8,4,18,.98);
+  padding:30px 44px;text-align:center;
+  box-shadow:0 0 40px rgba(255,64,129,.2),inset 0 0 30px rgba(0,0,0,.5);
+}
+.defeat-title{
+  font-family:'Orbitron',sans-serif;font-size:1.1rem;
+  color:#ff4081;text-shadow:0 0 18px #ff0055;
+  letter-spacing:.2em;margin-bottom:14px;
+}
+.defeat-item{font-size:.65rem;color:#c8d8e8;line-height:1.75;margin-bottom:20px}
+.defeat-btn{
+  font-family:'Press Start 2P',monospace;font-size:.6rem;
+  background:transparent;border:2px solid #ff4081;
+  color:#ff4081;padding:10px 22px;cursor:pointer;letter-spacing:.15em;transition:.2s;
+  margin:0 6px;
+}
+.defeat-btn:hover{background:rgba(255,64,129,.1);box-shadow:0 0 10px rgba(255,64,129,.35)}
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="mapa.html">◀ MAPA</a>
+
+<header>
+  <h1>GRAVITAÇÃO Z</h1>
+  <span class="badge">MISSÃO 1 · A GRANDE DISPUTA</span>
+</header>
+
+<div class="canvas-wrapper">
+  <canvas id="gameCanvas" width="800" height="550"></canvas>
+
+  <!-- Diálogo RPG -->
+  <div id="dialogue-overlay">
+    <div class="dlg-frame">
+      <div class="dlg-inner">
+        <div class="dlg-avatar-wrap">
+          <canvas id="avatar-canvas" width="90" height="90"></canvas>
+          <div class="dlg-avatar-name" id="avatar-name-l"></div>
+        </div>
+        <div class="dlg-sep"></div>
+        <div class="dlg-text-area">
+          <div class="dlg-speaker-bar">
+            <span class="dlg-speaker-name" id="speaker-name">—</span>
+          </div>
+          <div id="speaker-message"></div>
+          <div class="dlg-arrow">▼</div>
+        </div>
+        <div class="dlg-sep"></div>
+        <div class="dlg-avatar-right">
+          <canvas id="avatar-canvas-r" width="90" height="90"></canvas>
+          <div class="dlg-avatar-name-r" id="avatar-name-r"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Banner Vitória -->
+  <div id="victory-banner">
+    <div class="victory-inner">
+      <div class="victory-title">✦ VITÓRIA! ✦</div>
+      <div class="victory-item" id="victory-text"></div>
+      <button class="victory-btn" id="victory-btn">VOLTAR AO MAPA</button>
+    </div>
+  </div>
+
+  <!-- Banner Derrota -->
+  <div id="defeat-banner">
+    <div class="defeat-inner">
+      <div class="defeat-title">✗ DERROTA</div>
+      <div class="defeat-item">O dogma geocêntrico prevaleceu desta vez.<br>Tente novamente!</div>
+      <div>
+        <button class="defeat-btn" id="retry-btn">↺ TENTAR DE NOVO</button>
+        <button class="defeat-btn" id="map-btn-defeat">◀ MAPA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="hint" id="hint-bar">ESPAÇO: Socar · SETAS ← →: Mover · Derrote Aristóteles!</p>
+
+<script src="shared.js"></script>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+let estadoJogo = "FASE_1_LUTA";
+let estadoAnteriorDialogo = "FASE_1_LUTA";
+
+let progresso = carregarProgresso();
+
+// ── DIÁLOGO ────────────────────────────────────────────
+let scriptAtual=[],indiceScript=0,acaoPos=null,dlgOuvinte=null;
+
+function atualizarDlg(){
+  const ov=document.getElementById('dialogue-overlay');
+  if(indiceScript<scriptAtual.length){
+    const f=scriptAtual[indiceScript];
+    ov.classList.add('visible');
+    document.getElementById('speaker-name').textContent=f.quem;
+    document.getElementById('speaker-message').textContent=f.texto;
+    desenharAvatarCanvas(document.getElementById('avatar-canvas'),f.quem);
+    document.getElementById('avatar-name-l').textContent=f.quem;
+    const ouvinte=f.ouvinte||dlgOuvinte;
+    if(ouvinte){
+      desenharAvatarCanvas(document.getElementById('avatar-canvas-r'),ouvinte);
+      document.getElementById('avatar-name-r').textContent=ouvinte;
+    } else {
+      document.getElementById('avatar-canvas-r').getContext('2d').clearRect(0,0,90,90);
+      document.getElementById('avatar-name-r').textContent='';
+    }
+  } else {
+    ov.classList.remove('visible');
+    estadoJogo=estadoAnteriorDialogo;
+    const cb=acaoPos; acaoPos=null;
+    if(cb) cb();
+  }
+}
+
+function dispararHistoria(falas,callback,ouvinte){
+  scriptAtual=falas; indiceScript=0; acaoPos=callback; dlgOuvinte=ouvinte||null;
+  if(estadoJogo!=="DIALOGO") estadoAnteriorDialogo=estadoJogo;
+  estadoJogo="DIALOGO";
+  atualizarDlg();
+}
+
+// ── AMBIENTE ───────────────────────────────────────────
+const STARS = criarStars(W, H);
+
+// ── LUTA — DADOS ───────────────────────────────────────
+let luta={}, particulas=[], flashTela=0;
+const RANGE_SOCO=90, RANGE_ATAQUE=110, VEL_INIMIGO=1.6;
+
+function inicializarLuta(){
+  luta={
+    playerX:160, playerY:390, playerHp:100, playerMaxHp:100,
+    playerAtacando:false, timerAtaque:0, playerRecebendo:0,
+    arX:520, arY:370, arHp:100, arMaxHp:100,
+    arAtacando:false, arTimer:0, arRecebendo:0,
+    ptVisible:false, ptX:610, ptY:375, ptHp:100, ptMaxHp:100,
+    ptAtacando:false, ptTimer:0, ptRecebendo:0,
+    aliadosVisible:false, ariscX:-90, copX:-150, galX:-210,
+    fase:1, travado:false, golpeAnim:0,
+    msg:'ESPAÇO: Socar  ·  ← →: Mover',
+  };
+  particulas=[]; flashTela=0;
+  document.getElementById('hint-bar').textContent='ESPAÇO: Socar · SETAS ← →: Mover · Derrote Aristóteles!';
+  document.getElementById('defeat-banner').classList.remove('visible');
+  document.getElementById('victory-banner').classList.remove('visible');
+  estadoJogo="FASE_1_LUTA";
+  estadoAnteriorDialogo="FASE_1_LUTA";
+}
+
+function executarSoco(){
+  if(luta.travado||luta.playerAtacando||luta.fase>3) return;
+  luta.playerAtacando=true; luta.timerAtaque=16;
+  const dx1=Math.abs(luta.playerX-luta.arX);
+  const dx2=luta.ptVisible?Math.abs(luta.playerX-luta.ptX):9999;
+  if(dx1<RANGE_SOCO&&luta.arHp>0){
+    luta.arHp=Math.max(0,luta.arHp-(8+Math.floor(Math.random()*6)));
+    luta.arRecebendo=14; boom(luta.arX,luta.arY-30,'#ffe566',7); flashTela=4;
+  }
+  if(dx2<RANGE_SOCO&&luta.ptVisible&&luta.ptHp>0){
+    luta.ptHp=Math.max(0,luta.ptHp-(8+Math.floor(Math.random()*6)));
+    luta.ptRecebendo=14; boom(luta.ptX,luta.ptY-30,'#cc88ff',7); flashTela=4;
+  }
+}
+
+function moverInimigo(ix,vel){
+  const dx=luta.playerX-ix;
+  if(Math.abs(dx)>RANGE_ATAQUE+8) ix+=dx>0?vel:-vel;
+  return ix;
+}
+
+function boom(x,y,cor,n){
+  for(let i=0;i<n;i++)
+    particulas.push({x,y,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6-2,vida:25+Math.random()*15,maxVida:40,cor,r:Math.random()*4+2});
+}
+
+function processarLuta(t){
+  const emContextoLuta=estadoJogo==="FASE_1_LUTA"||(estadoJogo==="DIALOGO"&&estadoAnteriorDialogo==="FASE_1_LUTA")||estadoJogo==="FASE_1_VITORIA";
+  if(!emContextoLuta) return;
+  const lutaAtiva=estadoJogo==="FASE_1_LUTA";
+
+  if(!luta.travado&&lutaAtiva){
+    if(keys['ArrowLeft']&&luta.playerX>40)  luta.playerX-=4;
+    if(keys['ArrowRight']&&luta.playerX<W-40) luta.playerX+=4;
+  }
+  if(luta.playerAtacando){luta.timerAtaque--;if(luta.timerAtaque<=0)luta.playerAtacando=false;}
+  if(luta.arRecebendo>0)luta.arRecebendo--;
+  if(luta.ptRecebendo>0)luta.ptRecebendo--;
+  if(luta.playerRecebendo>0)luta.playerRecebendo--;
+
+  if(lutaAtiva&&!luta.travado){
+    if(luta.fase===1||luta.fase===3){
+      if(luta.arHp>0) luta.arX=moverInimigo(luta.arX,VEL_INIMIGO);
+    }
+    if(luta.fase===3&&luta.ptVisible&&luta.ptHp>0){
+      const dxPt=luta.playerX-luta.ptX;
+      if(Math.abs(dxPt)>RANGE_ATAQUE+20) luta.ptX+=dxPt>0?VEL_INIMIGO:-VEL_INIMIGO;
+    }
+  }
+
+  // ── FASE 1: Aristóteles solo ──
+  if(luta.fase===1&&lutaAtiva){
+    if(Math.random()<.025&&!luta.arAtacando){
+      luta.arAtacando=true; luta.arTimer=18;
+      if(Math.abs(luta.playerX-luta.arX)<RANGE_ATAQUE){
+        luta.playerHp=Math.max(0,luta.playerHp-6);
+        luta.playerRecebendo=12; boom(luta.playerX,luta.playerY-30,'#ff4081',4);
+      }
+    }
+    if(luta.arAtacando){luta.arTimer--;if(luta.arTimer<=0)luta.arAtacando=false;}
+
+    // derrota do jogador
+    if(luta.playerHp<=0&&!luta.travado){
+      luta.travado=true;
+      setTimeout(mostrarDerrota, 400);
+    }
+
+    if(luta.arHp<=50&&!luta.travado){
+      luta.travado=true; luta.fase=2;
+      setTimeout(()=>{
+        dispararHistoria([
+          {quem:"ARISTÓTELES",ouvinte:"PTOLOMEU",texto:"Urgh... Você é forte, herético. Mas não é páreo para dois séculos de ciência dominante!"},
+          {quem:"PTOLOMEU",ouvinte:"ARISTÓTELES",texto:"Meu mestre! Chego eu, Ptolomeu! Construí os Epiciclos e Deferentes para defender o Geocentrismo. Juntos, venceremos!"},
+          {quem:"NARRADOR",ouvinte:"JOGADOR",texto:"Ptolomeu entra na arena! Os dois se unem e atacam juntos. O jogador recua..."},
+        ],()=>{
+          luta.ptVisible=true; luta.fase=3; luta.travado=false;
+          luta.arHp=100; luta.ptHp=100;
+          document.getElementById('hint-bar').textContent='ATENÇÃO: Dois inimigos! Desvie e contra-ataque!';
+        },"JOGADOR");
+      },200);
+    }
+  }
+
+  // ── FASE 3: dupla ──
+  if(luta.fase===3&&lutaAtiva){
+    if(Math.random()<.04&&!luta.arAtacando){
+      luta.arAtacando=true; luta.arTimer=16;
+      if(Math.abs(luta.playerX-luta.arX)<RANGE_ATAQUE){
+        luta.playerHp=Math.max(0,luta.playerHp-8);
+        luta.playerRecebendo=15; boom(luta.playerX,luta.playerY-30,'#ff4081',5);
+      }
+    }
+    if(Math.random()<.035&&luta.ptVisible&&!luta.ptAtacando){
+      luta.ptAtacando=true; luta.ptTimer=14;
+      if(Math.abs(luta.playerX-luta.ptX)<RANGE_ATAQUE){
+        luta.playerHp=Math.max(0,luta.playerHp-7);
+        luta.playerRecebendo=15; boom(luta.playerX,luta.playerY-30,'#aa44ff',5);
+      }
+    }
+    if(luta.arAtacando){luta.arTimer--;if(luta.arTimer<=0)luta.arAtacando=false;}
+    if(luta.ptAtacando){luta.ptTimer--;if(luta.ptTimer<=0)luta.ptAtacando=false;}
+
+    // derrota do jogador
+    if(luta.playerHp<=0&&!luta.travado){
+      luta.travado=true;
+      setTimeout(mostrarDerrota, 400);
+    }
+
+    if(luta.playerHp<=18&&!luta.travado){
+      luta.travado=true; luta.fase=4; luta.playerHp=18;
+      setTimeout(()=>{
+        dispararHistoria([
+          {quem:"NARRADOR",ouvinte:"JOGADOR",texto:"Você está caindo... A força dos dogmas medievais é esmagadora. Mas uma luz brilha no horizonte cósmico!"},
+          {quem:"ARISTARCO DE SAMOS",ouvinte:"ARISTÓTELES",texto:"Não recue! Eu, Aristarco de Samos, propus 300 a.C. que a Terra orbita o Sol. A semente sempre existiu!"},
+          {quem:"NICOLAU COPÉRNICO",ouvinte:"ARISTÓTELES",texto:"E eu, Copérnico, publiquei as bases matemáticas em 1543. O Sol é o centro — há equações para provar!"},
+          {quem:"GALILEU GALILEI",ouvinte:"PTOLOMEU",texto:"E eu apontei minha LUNETA ao céu e vi as luas de Júpiter! Nem tudo orbita a Terra. A observação destrói o dogma!"},
+          {quem:"NARRADOR",ouvinte:"ARISTÓTELES",texto:"Os três heliocentritas se unem e lançam um FEIXE DE LUZ CIENTÍFICA devastador!"},
+        ],()=>{ luta.fase=5; luta.aliadosVisible=true; luta.golpeAnim=120; },"ARISTÓTELES");
+      },200);
+    }
+  }
+
+  // ── FASE 5: animação golpe especial ──
+  if(luta.fase===5&&luta.golpeAnim>0){
+    luta.golpeAnim--;
+    if(luta.ariscX<90)  luta.ariscX+=3.5;
+    if(luta.copX<110)   luta.copX+=3.2;
+    if(luta.galX<130)   luta.galX+=3.0;
+    if(luta.golpeAnim>40&&luta.golpeAnim%3===0)
+      boom(luta.galX+30,360,Math.random()>.5?'#00e5ff':'#ffe566',5);
+    if(luta.golpeAnim===40){
+      luta.arHp=0; luta.ptHp=0; flashTela=28;
+      boom(luta.arX,luta.arY-30,'#ffe566',22);
+      boom(luta.ptX,luta.ptY-30,'#cc88ff',22);
+    }
+    if(luta.golpeAnim===0){
+      luta.fase=6;
+      setTimeout(()=>{
+        dispararHistoria([
+          {quem:"ARISTÓTELES",ouvinte:"GALILEU GALILEI",texto:"Impossível... Os epiciclos são impotentes contra a evidência observacional. Retiro-me..."},
+          {quem:"PTOLOMEU",ouvinte:"GALILEU GALILEI",texto:"Meus cálculos destruídos pela luneta. Escolhi o referencial errado..."},
+          {quem:"GALILEU GALILEI",ouvinte:"JOGADOR",texto:"Jovem viajante! Pegue minha LUNETA. Com ela, você verá as órbitas elípticas de Kepler!"},
+          {quem:"SISTEMA",ouvinte:"JOGADOR",texto:"✦ ITEM RECEBIDO: LUNETA DE GALILEU ✦  Missão 2 — Leis de Kepler — DESBLOQUEADA no mapa!"},
+        ],()=>{
+          progresso.tem_luneta=true;
+          progresso.missao2_unlocked=true;
+          salvarProgresso(progresso);
+          mostrarVitoria();
+        },"JOGADOR");
+      },300);
+    }
+  }
+
+  particulas.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.vida--;});
+  particulas=particulas.filter(p=>p.vida>0);
+  if(flashTela>0) flashTela--;
+}
+
+function mostrarVitoria(){
+  estadoJogo="FASE_1_VITORIA";
+  document.getElementById('victory-text').innerHTML=
+    '🔭 <strong style="color:#ffe566">LUNETA DE GALILEU</strong> adicionada ao inventário!<br><br>'+
+    '🌍 O Geocentrismo foi refutado com evidências.<br>'+
+    '☀️ O modelo Heliocêntrico triunfa!<br><br>'+
+    '<span style="color:#44eebb">🗺️ MISSÃO 2 — LEIS DE KEPLER — DESBLOQUEADA!</span>';
+  document.getElementById('victory-banner').classList.add('visible');
+  document.getElementById('victory-btn').onclick=()=>{ window.location.href='mapa.html'; };
+}
+
+function mostrarDerrota(){
+  estadoJogo="FASE_1_DERROTA";
+  document.getElementById('defeat-banner').classList.add('visible');
+}
+
+document.getElementById('retry-btn').onclick=()=>{ inicializarLuta(); };
+document.getElementById('map-btn-defeat').onclick=()=>{ window.location.href='mapa.html'; };
+
+// ── CONTROLES ──────────────────────────────────────────
+const keys={};
+window.addEventListener('keydown',e=>{
+  keys[e.key]=true;
+  if(['ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  if(estadoJogo==="DIALOGO"&&(e.key===' '||e.key==='Enter')){ indiceScript++; atualizarDlg(); return; }
+  if(estadoJogo==="FASE_1_LUTA"&&e.key===' ') executarSoco();
+});
+window.addEventListener('keyup',e=>{keys[e.key]=false;});
+
+// ── DESENHO ────────────────────────────────────────────
+function r2(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h);}
+
+function desenharJogadorLuta(x,y,atacando,recebendo,t){
+  const bob=Math.sin(t*.06)*.8;
+  const sh=recebendo>0?(Math.random()-.5)*5:0;
+  const ox=x+sh,oy=y+bob;
+  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(ox,oy+5,18,5,0,0,Math.PI*2);ctx.fill();
+  r2(ox-14,oy-60,28,40,recebendo>0?'#ff6688':'#1a44cc');
+  r2(ox-16,oy-48,5,28,'#0f2a88');
+  if(atacando){r2(ox+11,oy-50,26,10,'#ff4081');}else{r2(ox+11,oy-48,5,26,'#0f2a88');}
+  r2(ox-12,oy-20,10,26,'#dd2211');r2(ox+2,oy-20,10,26,'#dd2211');
+  r2(ox-14,oy+5,13,6,'#eecc88');r2(ox+1,oy+5,13,6,'#eecc88');
+  r2(ox-10,oy-76,20,18,'#bbccee');r2(ox-8,oy-74,16,12,'rgba(160,220,255,.75)');
+  r2(ox-6,oy-73,5,4,'rgba(255,255,255,.4)');r2(ox-14,oy-22,28,5,'#ffaa00');
+  if(recebendo>0){ctx.fillStyle='rgba(255,60,60,.28)';ctx.beginPath();ctx.arc(ox,oy-35,26,0,Math.PI*2);ctx.fill();}
+}
+
+function desenharAristotelesLuta(x,y,atacando,recebendo,morto,t){
+  if(morto)return;
+  const bob=Math.sin(t*.05+1)*.8;const sh=recebendo>0?(Math.random()-.5)*4:0;
+  const ox=x+sh,oy=y+bob;
+  ctx.save();ctx.globalAlpha=recebendo>0?.6:1;
+  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(ox,oy+5,22,6,0,0,Math.PI*2);ctx.fill();
+  r2(ox-18,oy-64,36,50,'#886600');r2(ox-22,oy-54,10,34,'#aa8800');r2(ox+12,oy-54,10,34,'#aa8800');
+  r2(ox-14,oy-35,4,22,'#ffcc00');r2(ox+10,oy-35,4,22,'#ffcc00');
+  if(atacando)r2(ox-32,oy-50,18,8,'#cc9900');
+  r2(ox-12,oy-80,24,18,'#ffe566');r2(ox-14,oy-80,4,8,'#cc9900');r2(ox+10,oy-80,4,8,'#cc9900');
+  r2(ox-10,oy-64,20,4,'#cc9900');r2(ox-8,oy-74,4,4,'#553300');r2(ox+4,oy-74,4,4,'#553300');
+  r2(ox-9,oy-77,5,2,'#553300');r2(ox+3,oy-77,5,2,'#553300');
+  r2(ox-16,oy-14,14,6,'#cc9944');r2(ox+2,oy-14,14,6,'#cc9944');
+  r2(ox+14,oy-50,6,20,'#eedd99');r2(ox+13,oy-52,8,4,'#ddbb77');
+  ctx.restore();
+  drawMiniHP(ox,oy-92,luta.arHp,luta.arMaxHp,'#e74c3c','#ffe566');
+}
+
+function desenharPtolomeuLuta(x,y,atacando,recebendo,morto,t){
+  if(!luta.ptVisible||morto)return;
+  const bob=Math.sin(t*.055+2)*.8;const sh=recebendo>0?(Math.random()-.5)*4:0;
+  const ox=x+sh,oy=y+bob;
+  ctx.save();ctx.globalAlpha=recebendo>0?.55:1;
+  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(ox,oy+5,20,5,0,0,Math.PI*2);ctx.fill();
+  r2(ox-16,oy-62,32,46,'#553388');r2(ox-20,oy-52,8,30,'#663399');r2(ox+12,oy-52,8,30,'#663399');
+  ctx.strokeStyle='#cc88ff';ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(ox,oy-40,10,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(ox,oy-40,5,0,Math.PI*2);ctx.stroke();
+  r2(ox-10,oy-78,20,18,'#e8c090');r2(ox-12,oy-78,4,7,'#885533');r2(ox+8,oy-78,4,7,'#885533');
+  r2(ox-7,oy-72,3,3,'#334455');r2(ox+4,oy-72,3,3,'#334455');
+  ctx.strokeStyle='#cc88ff';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(ox-22,oy-48,10,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox-22,oy-58);ctx.lineTo(ox-22,oy-38);ctx.moveTo(ox-32,oy-48);ctx.lineTo(ox-12,oy-48);ctx.stroke();
+  if(atacando)r2(ox+12,oy-52,22,8,'#aa44cc');
+  r2(ox-14,oy-14,12,5,'#886644');r2(ox+2,oy-14,12,5,'#886644');
+  ctx.restore();
+  drawMiniHP(ox,oy-92,luta.ptHp,luta.ptMaxHp,'#e74c3c','#cc88ff');
+}
+
+function drawMiniHP(x,y,hp,maxHp,bg,fg){
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(x-31,y-1,62,8);
+  ctx.fillStyle=bg+'55';ctx.fillRect(x-30,y,60,6);
+  ctx.fillStyle=fg;ctx.fillRect(x-30,y,60*(hp/maxHp),6);
+}
+
+function desenharAliado(x,y,bodyCol,accentCol,t,idx){
+  const bob=Math.sin(t*.06+idx)*.8;const ox=x,oy=y+bob;
+  ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(ox,oy+5,16,4,0,0,Math.PI*2);ctx.fill();
+  r2(ox-12,oy-58,24,38,bodyCol);r2(ox-10,oy-72,20,16,accentCol);
+  r2(ox-8,oy-70,16,12,'rgba(255,255,255,.14)');r2(ox-6,oy-69,5,4,'rgba(255,255,255,.35)');
+  r2(ox-14,oy-46,4,22,bodyCol);r2(ox+10,oy-46,4,22,bodyCol);
+  r2(ox-10,oy-20,9,22,'#dd3322');r2(ox+1,oy-20,9,22,'#dd3322');r2(ox-12,oy-22,24,4,'#ffaa00');
+  ctx.save();ctx.globalAlpha=.22;
+  const grd=ctx.createRadialGradient(ox,oy-30,4,ox,oy-30,32);
+  grd.addColorStop(0,accentCol);grd.addColorStop(1,'transparent');
+  ctx.fillStyle=grd;ctx.beginPath();ctx.arc(ox,oy-30,32,0,Math.PI*2);ctx.fill();ctx.restore();
+}
+
+function desenharAliadosLuta(t){
+  if(!luta.aliadosVisible)return;
+  desenharAliado(luta.ariscX,375,'#115533','#44eebb',t,0);
+  desenharAliado(luta.copX,  370,'#553311','#ffaa44',t,1);
+  desenharAliado(luta.galX,  365,'#113355','#44aaff',t,2);
+  if(luta.golpeAnim>40){
+    const prog=1-(luta.golpeAnim-40)/80;
+    const bx1=luta.galX+30,bx2=luta.arX,by=360;
+    const grad=ctx.createLinearGradient(bx1,by,bx2,by);
+    grad.addColorStop(0,'rgba(0,229,255,.92)');grad.addColorStop(.5,'rgba(255,255,100,.92)');grad.addColorStop(1,'rgba(255,100,255,.65)');
+    ctx.save();ctx.globalAlpha=.85;ctx.strokeStyle=grad;ctx.lineWidth=16+Math.sin(t*.3)*4;
+    ctx.shadowColor='#00e5ff';ctx.shadowBlur=32;
+    ctx.beginPath();ctx.moveTo(bx1,by);ctx.lineTo(bx1+(bx2-bx1)*prog,by);ctx.stroke();
+    ctx.shadowBlur=0;ctx.restore();
+  }
+}
+
+function desenharTelaLuta(t){
+  ctx.fillStyle='#07071a';ctx.fillRect(0,0,W,H);
+  const nb=ctx.createRadialGradient(400,300,30,400,300,360);
+  nb.addColorStop(0,'rgba(55,15,95,.2)');nb.addColorStop(1,'transparent');
+  ctx.fillStyle=nb;ctx.fillRect(0,0,W,H);
+  STARS.forEach(s=>{
+    s.twinkleOffset+=s.twinkleSpeed;
+    ctx.fillStyle=`rgba(255,255,255,${.18+Math.sin(s.twinkleOffset)*.2})`;
+    ctx.fillRect(s.x,s.y,s.r,s.r);
+  });
+  // chão
+  const gf=ctx.createLinearGradient(0,420,0,H);gf.addColorStop(0,'#1a1a3a');gf.addColorStop(1,'#080815');
+  ctx.fillStyle=gf;ctx.fillRect(0,420,W,H-420);
+  ctx.strokeStyle='rgba(0,229,255,.13)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,420);ctx.lineTo(W,420);ctx.stroke();
+  // colunas
+  [55,745].forEach(cx=>{
+    ctx.fillStyle='#1e2a44';ctx.fillRect(cx-18,200,36,220);
+    ctx.fillStyle='#2a3a55';ctx.fillRect(cx-22,195,44,12);ctx.fillRect(cx-22,420,44,10);
+    for(let i=0;i<4;i++){ctx.fillStyle='rgba(0,229,255,.05)';ctx.fillRect(cx-14+i*8,210,3,200);}
+  });
+  if(flashTela>0){ctx.fillStyle=`rgba(255,255,255,${flashTela*.024})`;ctx.fillRect(0,0,W,H);}
+
+  desenharAristotelesLuta(luta.arX,luta.arY,luta.arAtacando,luta.arRecebendo,luta.arHp<=0,t);
+  desenharPtolomeuLuta(luta.ptX,luta.ptY,luta.ptAtacando,luta.ptRecebendo,luta.ptHp<=0,t);
+  desenharAliadosLuta(t);
+  desenharJogadorLuta(luta.playerX,luta.playerY,luta.playerAtacando,luta.playerRecebendo,t);
+
+  particulas.forEach(p=>{const a=p.vida/p.maxVida;ctx.globalAlpha=a;ctx.fillStyle=p.cor;ctx.beginPath();ctx.arc(p.x,p.y,p.r*a,0,Math.PI*2);ctx.fill();});
+  ctx.globalAlpha=1;
+
+  // HUD
+  ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,W,62);
+  ctx.strokeStyle='rgba(0,229,255,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,62);ctx.lineTo(W,62);ctx.stroke();
+  // jogador HP
+  ctx.font="10px 'Orbitron'";ctx.fillStyle='#00e5ff';ctx.textAlign='left';ctx.fillText('JOGADOR',36,22);
+  ctx.fillStyle='#220808';ctx.fillRect(36,28,230,16);
+  // cor da barra muda conforme hp
+  const hpRatio=luta.playerHp/luta.playerMaxHp;
+  ctx.fillStyle=hpRatio>.5?'#2ecc71':hpRatio>.25?'#f39c12':'#e74c3c';
+  ctx.fillRect(36,28,230*hpRatio,16);
+  ctx.strokeStyle='rgba(0,229,255,.4)';ctx.lineWidth=1;ctx.strokeRect(36,28,230,16);
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.font="8px 'Share Tech Mono'";ctx.fillText(Math.round(luta.playerHp)+'HP',40,40);
+  // inimigos HP
+  const nomeIn=luta.ptVisible?'AR. & PTOLOMEU':'ARISTÓTELES';
+  ctx.font="10px 'Orbitron'";ctx.fillStyle='#ff4081';ctx.textAlign='right';ctx.fillText(nomeIn,764,22);
+  const mediaHp=luta.ptVisible?Math.max(luta.arHp,0)*.5+Math.max(luta.ptHp,0)*.5:luta.arHp;
+  ctx.fillStyle='#220808';ctx.fillRect(534,28,230,16);
+  ctx.fillStyle='#e74c3c';ctx.fillRect(534+230*(1-mediaHp/100),28,230*(mediaHp/100),16);
+  ctx.strokeStyle='rgba(255,64,129,.4)';ctx.lineWidth=1;ctx.strokeRect(534,28,230,16);
+  ctx.textAlign='right';ctx.fillStyle='rgba(255,255,255,.7)';ctx.font="8px 'Share Tech Mono'";ctx.fillText(Math.round(mediaHp)+'HP',760,40);
+  // VS
+  ctx.save();ctx.font="bold 16px 'Orbitron'";ctx.fillStyle='#ffe566';ctx.textAlign='center';
+  ctx.shadowColor='#ff9900';ctx.shadowBlur=14;ctx.fillText('VS',W/2,36);ctx.shadowBlur=0;ctx.restore();
+  // round badge
+  const fl=['','ROUND 1','ROUND 2','ROUND 2 – DUPLA!','REFORÇO HELIOCÊNTRICO!','✦ GOLPE ESPECIAL ✦',''][luta.fase]||'';
+  if(fl){ctx.font="8px 'Press Start 2P'";ctx.fillStyle='rgba(255,229,100,.75)';ctx.textAlign='center';ctx.fillText(fl,W/2,H-22);}
+  ctx.font="7px 'Share Tech Mono'";ctx.fillStyle='rgba(0,229,255,.32)';ctx.textAlign='center';
+  ctx.fillText(luta.msg||'',W/2,H-8);
+}
+
+// ── LOOP ───────────────────────────────────────────────
+let ticks=0;
+inicializarLuta();
+
+// Diálogo de introdução da fase
+dispararHistoria([
+  {quem:"NARRADOR",ouvinte:"ARISTÓTELES",texto:"Você pousa na Grécia Antiga, coração do pensamento clássico. Uma figura imponente bloqueia seu caminho ao cosmos."},
+  {quem:"ARISTÓTELES",ouvinte:"JOGADOR",texto:"Alto lá! Eu sou Aristóteles. A Terra é o centro IMÓVEL e PERFEITO do universo. O Geocentrismo é a ORDEM NATURAL das esferas celestes!"},
+  {quem:"ARISTÓTELES",ouvinte:"JOGADOR",texto:"O fogo sobe, as pedras caem, os planetas giram em círculos perfeitos ao redor da Terra. Quem ousa questionar, questiona a própria razão!"},
+  {quem:"JOGADOR",ouvinte:"ARISTÓTELES",texto:"Mas as observações mostram outra realidade! O retrógrado de Marte, as fases de Vênus... seus círculos não explicam os dados!"},
+  {quem:"ARISTÓTELES",ouvinte:"JOGADOR",texto:"Ousado, herético! Se quer atravessar meu domínio, terá que me vencer em combate científico. EN GARDE!"},
+],()=>{ estadoJogo="FASE_1_LUTA"; },"JOGADOR");
+
+function loop(){
+  ticks++;
+  ctx.fillStyle='#04040e';ctx.fillRect(0,0,W,H);
+  processarLuta(ticks);
+  desenharTelaLuta(ticks);
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
