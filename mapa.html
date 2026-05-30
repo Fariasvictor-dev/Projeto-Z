@@ -115,6 +115,7 @@ canvas{display:block}
 <p class="hint" id="hint-bar">SETAS: Mover · ENTER: Interagir com missão</p>
 
 <script src="shared.js"></script>
+<script src="audio.js"></script>
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx    = canvas.getContext('2d');
@@ -152,8 +153,8 @@ const keys={};
 window.addEventListener('keydown',e=>{
   keys[e.key]=true;
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
-  if(estadoJogo==="DIALOGO"&&(e.key===' '||e.key==='Enter')){ indiceScript++; atualizarDlg(); return; }
-  if(estadoJogo==="MAPA"&&e.key==='Enter'&&player.nearMission!==null) iniciarMissao(player.nearMission);
+  if(estadoJogo==="DIALOGO"&&(e.key===' '||e.key==='Enter')){ GZ_Audio.dialogoAvancar(); indiceScript++; atualizarDlg(); return; }
+  if(estadoJogo==="MAPA"&&e.key==='Enter'&&player.nearMission!==null){ GZ_Audio.btnClick(); iniciarMissao(player.nearMission); }
 });
 window.addEventListener('keyup',e=>{keys[e.key]=false;});
 

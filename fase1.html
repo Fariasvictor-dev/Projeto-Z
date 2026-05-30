@@ -186,6 +186,7 @@ canvas{display:block}
 <p class="hint" id="hint-bar">ESPAÇO: Socar · SETAS ← →: Mover · Derrote Aristóteles!</p>
 
 <script src="shared.js"></script>
+<script src="audio.js"></script>
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx    = canvas.getContext('2d');
@@ -265,11 +266,11 @@ function executarSoco(){
   const dx2=luta.ptVisible?Math.abs(luta.playerX-luta.ptX):9999;
   if(dx1<RANGE_SOCO&&luta.arHp>0){
     luta.arHp=Math.max(0,luta.arHp-(8+Math.floor(Math.random()*6)));
-    luta.arRecebendo=14; boom(luta.arX,luta.arY-30,'#ffe566',7); flashTela=4;
+    luta.arRecebendo=14; boom(luta.arX,luta.arY-30,'#ffe566',7); flashTela=4; GZ_Audio.danoCausado();
   }
   if(dx2<RANGE_SOCO&&luta.ptVisible&&luta.ptHp>0){
     luta.ptHp=Math.max(0,luta.ptHp-(8+Math.floor(Math.random()*6)));
-    luta.ptRecebendo=14; boom(luta.ptX,luta.ptY-30,'#cc88ff',7); flashTela=4;
+    luta.ptRecebendo=14; boom(luta.ptX,luta.ptY-30,'#cc88ff',7); flashTela=4; GZ_Audio.danoCausado();
   }
 }
 
@@ -314,7 +315,7 @@ function processarLuta(t){
       luta.arAtacando=true; luta.arTimer=18;
       if(Math.abs(luta.playerX-luta.arX)<RANGE_ATAQUE){
         luta.playerHp=Math.max(0,luta.playerHp-6);
-        luta.playerRecebendo=12; boom(luta.playerX,luta.playerY-30,'#ff4081',4);
+        luta.playerRecebendo=12; boom(luta.playerX,luta.playerY-30,'#ff4081',4); GZ_Audio.socoNormal();
       }
     }
     if(luta.arAtacando){luta.arTimer--;if(luta.arTimer<=0)luta.arAtacando=false;}
@@ -347,14 +348,14 @@ function processarLuta(t){
       luta.arAtacando=true; luta.arTimer=16;
       if(Math.abs(luta.playerX-luta.arX)<RANGE_ATAQUE){
         luta.playerHp=Math.max(0,luta.playerHp-8);
-        luta.playerRecebendo=15; boom(luta.playerX,luta.playerY-30,'#ff4081',5);
+        luta.playerRecebendo=15; boom(luta.playerX,luta.playerY-30,'#ff4081',5); GZ_Audio.socoNormal();
       }
     }
     if(Math.random()<.035&&luta.ptVisible&&!luta.ptAtacando){
       luta.ptAtacando=true; luta.ptTimer=14;
       if(Math.abs(luta.playerX-luta.ptX)<RANGE_ATAQUE){
         luta.playerHp=Math.max(0,luta.playerHp-7);
-        luta.playerRecebendo=15; boom(luta.playerX,luta.playerY-30,'#aa44ff',5);
+        luta.playerRecebendo=15; boom(luta.playerX,luta.playerY-30,'#aa44ff',5); GZ_Audio.socoNormal();
       }
     }
     if(luta.arAtacando){luta.arTimer--;if(luta.arTimer<=0)luta.arAtacando=false;}
@@ -389,7 +390,7 @@ function processarLuta(t){
     if(luta.golpeAnim>40&&luta.golpeAnim%3===0)
       boom(luta.galX+30,360,Math.random()>.5?'#00e5ff':'#ffe566',5);
     if(luta.golpeAnim===40){
-      luta.arHp=0; luta.ptHp=0; flashTela=28;
+      GZ_Audio.socoForte(); luta.arHp=0; luta.ptHp=0; flashTela=28;
       boom(luta.arX,luta.arY-30,'#ffe566',22);
       boom(luta.ptX,luta.ptY-30,'#cc88ff',22);
     }
@@ -418,30 +419,32 @@ function processarLuta(t){
 
 function mostrarVitoria(){
   estadoJogo="FASE_1_VITORIA";
+  GZ_Audio.vitoria();
   document.getElementById('victory-text').innerHTML=
     '🔭 <strong style="color:#ffe566">LUNETA DE GALILEU</strong> adicionada ao inventário!<br><br>'+
     '🌍 O Geocentrismo foi refutado com evidências.<br>'+
     '☀️ O modelo Heliocêntrico triunfa!<br><br>'+
     '<span style="color:#44eebb">🗺️ MISSÃO 2 — LEIS DE KEPLER — DESBLOQUEADA!</span>';
   document.getElementById('victory-banner').classList.add('visible');
-  document.getElementById('victory-btn').onclick=()=>{ window.location.href='mapa.html'; };
+  document.getElementById('victory-btn').onclick=()=>{ GZ_Audio.btnClick(); window.location.href='mapa.html'; };
 }
 
 function mostrarDerrota(){
   estadoJogo="FASE_1_DERROTA";
+  GZ_Audio.derrota();
   document.getElementById('defeat-banner').classList.add('visible');
 }
 
-document.getElementById('retry-btn').onclick=()=>{ inicializarLuta(); };
-document.getElementById('map-btn-defeat').onclick=()=>{ window.location.href='mapa.html'; };
+document.getElementById('retry-btn').onclick=()=>{ GZ_Audio.btnClick(); inicializarLuta(); };
+document.getElementById('map-btn-defeat').onclick=()=>{ GZ_Audio.btnClick(); window.location.href='mapa.html'; };
 
 // ── CONTROLES ──────────────────────────────────────────
 const keys={};
 window.addEventListener('keydown',e=>{
   keys[e.key]=true;
   if(['ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
-  if(estadoJogo==="DIALOGO"&&(e.key===' '||e.key==='Enter')){ indiceScript++; atualizarDlg(); return; }
-  if(estadoJogo==="FASE_1_LUTA"&&e.key===' ') executarSoco();
+  if(estadoJogo==="DIALOGO"&&(e.key===' '||e.key==='Enter')){ GZ_Audio.dialogoAvancar(); indiceScript++; atualizarDlg(); return; }
+  if(estadoJogo==="FASE_1_LUTA"&&e.key===' '){ GZ_Audio.socoNormal(); executarSoco(); }
 });
 window.addEventListener('keyup',e=>{keys[e.key]=false;});
 
