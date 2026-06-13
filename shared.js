@@ -45,16 +45,24 @@ _playerImg.src = 'data:image/png;base64,' + PLAYER_AVATAR_B64;
 const SAVE_KEY = 'gravitacaoZ_progresso';
 
 function carregarProgresso(){
+  const PADRAO = {
+    missao1_unlocked: true,
+    missao2_unlocked: false,
+    missao2b_unlocked: false,
+    missao3_unlocked: false,
+    fase3b_completa: false,
+    tem_luneta: false,
+    tem_tabela_kepler: false,
+    tem_principia: false,
+  };
   try {
     const s = localStorage.getItem(SAVE_KEY);
-    return s ? JSON.parse(s) : {
-      missao1_unlocked: true,
-      missao2_unlocked: false,
-      missao3_unlocked: false,
-      tem_luneta: false
-    };
+    if(!s) return {...PADRAO};
+    // Mesclar com padrão para garantir campos novos mesmo em saves antigos
+    const salvo = JSON.parse(s);
+    return {...PADRAO, ...salvo};
   } catch(e) {
-    return { missao1_unlocked:true, missao2_unlocked:false, missao3_unlocked:false, tem_luneta:false };
+    return {...PADRAO};
   }
 }
 
