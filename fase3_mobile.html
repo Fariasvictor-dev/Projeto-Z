@@ -201,6 +201,120 @@
 .back-btn{position:fixed;top:12px;left:14px;font-family:'Press Start 2P',monospace;font-size:.5rem;color:#2a4a6a;text-decoration:none;letter-spacing:.1em;border:1px solid #1a2a3a;padding:5px 10px;z-index:50;transition:.2s;}
 .back-btn:hover{color:#ff4081;border-color:#ff4081}
 </style>
+<style id="gz-mobile-style">
+  @media (max-width: 880px), (pointer: coarse) {
+    body{
+      padding: 0 !important;
+      justify-content: flex-start !important;
+      min-height: 100vh;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+    header{
+      margin-top: env(safe-area-inset-top, 8px);
+      transform: scale(0.62);
+      transform-origin: top center;
+      margin-bottom: -10px;
+    }
+    .hint{ display:none; }
+    .back-btn{
+      font-size: .42rem !important;
+      padding: 4px 8px !important;
+      top: env(safe-area-inset-top, 6px) !important;
+      left: 6px !important;
+      z-index: 1000 !important;
+    }
+    #gz-scale-outer{
+      width: 100%;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      overflow: hidden;
+    }
+    .canvas-wrapper{
+      transform-origin: top center;
+      flex-shrink: 0;
+    }
+    #gz-touch-controls{
+      position: fixed;
+      left:0; right:0; bottom:0;
+      display:flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      z-index: 999;
+      pointer-events:none;
+      gap: 8px;
+    }
+    #gz-touch-controls.hidden{ display:none; }
+    .gz-dpad{
+      display:grid;
+      grid-template-columns: 50px 50px 50px;
+      grid-template-rows: 50px 50px;
+      gap:5px;
+      pointer-events:auto;
+    }
+    .gz-dpad .gz-btn{ grid-row: 2; }
+    .gz-dpad .gz-up{ grid-row:1; grid-column:2; }
+    .gz-extra{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      pointer-events:auto;
+      align-items:center;
+    }
+    .gz-actions{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      pointer-events:auto;
+      align-items:center;
+    }
+    .gz-btn{
+      width:50px;height:50px;
+      border-radius:14px;
+      border:2px solid #ffe566;
+      background:rgba(10,10,25,.78);
+      color:#ffe566;
+      font-family:'Press Start 2P',monospace;
+      font-size:1rem;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 0 10px rgba(255,229,100,.25);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+    .gz-btn:active, .gz-btn.gz-pressed{
+      background:rgba(255,229,100,.28);
+      box-shadow:0 0 16px rgba(255,229,100,.6);
+    }
+    .gz-btn.gz-action{
+      width:72px;height:72px;
+      border-radius:50%;
+      border-color:#ff6688;
+      color:#ff6688;
+      font-size:.6rem;
+    }
+    .gz-btn.gz-secondary{
+      width:50px;height:50px;
+      border-radius:50%;
+      border-color:#4488ff;
+      color:#4488ff;
+      font-size:.5rem;
+    }
+    .gz-btn.gz-esc{
+      width:42px;height:42px;
+      border-radius:8px;
+      border-color:#888;
+      color:#aaa;
+      font-size:.42rem;
+    }
+    #dialogue-overlay{ touch-action: none; }
+  }
+  @media (min-width: 881px) and (pointer: fine){
+    #gz-touch-controls{ display:none !important; }
+  }
+</style>
 </head>
 <body>
 <a class="back-btn" href="mapa.html" onclick="GZ_Audio&&GZ_Audio.btnClick()">◀ MAPA</a>
@@ -536,6 +650,203 @@ function loop(){
   requestAnimationFrame(loop);
 }
 loop();
+</script>
+<div id="gz-touch-controls">
+  <div class="gz-dpad">
+    <div class="gz-btn gz-up" data-key="ArrowUp">▲</div>
+    <div class="gz-btn gz-left" data-key="ArrowLeft">◀</div>
+    <div class="gz-btn gz-down" data-key="ArrowDown">▼</div>
+    <div class="gz-btn gz-right" data-key="ArrowRight">▶</div>
+  </div>
+  <div class="gz-extra">
+    <div class="gz-btn gz-esc" data-key="Escape" data-tap="1" title="ESC">ESC</div>
+    <div class="gz-btn gz-secondary" data-key="r" data-tap="1" title="R">R</div>
+  </div>
+  <div class="gz-actions">
+    <div class="gz-btn gz-secondary" data-key="Enter" data-tap="1" title="Enter">ENT</div>
+    <div class="gz-btn gz-action" data-key=" " title="Ação">SOCO</div>
+  </div>
+</div>
+
+<script id="gz-mobile-script">
+(function(){
+  // ── 1. Escalonar o canvas-wrapper para caber na tela ──
+  function escalarCanvas(){
+    const wrapper = document.querySelector('.canvas-wrapper');
+    if(!wrapper) return;
+    let outer = document.getElementById('gz-scale-outer');
+    if(!outer){
+      outer = document.createElement('div');
+      outer.id = 'gz-scale-outer';
+      wrapper.parentNode.insertBefore(outer, wrapper);
+      outer.appendChild(wrapper);
+    }
+    const baseW = wrapper.offsetWidth || 800;
+    const baseH = wrapper.offsetHeight || 550;
+    const availW = window.innerWidth - 8;
+    const isMobile = window.matchMedia('(max-width: 880px), (pointer: coarse)').matches;
+    const reservedBottom = isMobile ? 165 : 0;
+    const reservedTop = isMobile ? 36 : 0;
+    const availH = window.innerHeight - reservedBottom - reservedTop;
+    const scale = Math.min(availW / baseW, availH / baseH, 1);
+    wrapper.style.transform = `scale(${scale})`;
+    wrapper._gzScale = scale;
+    outer.style.height = (baseH * scale) + 'px';
+  }
+  window.addEventListener('resize', escalarCanvas);
+  window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));
+  document.addEventListener('DOMContentLoaded', escalarCanvas);
+  setTimeout(escalarCanvas, 50);
+  setTimeout(escalarCanvas, 400);
+
+  // ── 2. Disparar eventos de teclado sintéticos ──
+  function dispatchKey(type, key){
+    const ev = new KeyboardEvent(type, {key:key, bubbles:true, cancelable:true});
+    window.dispatchEvent(ev);
+    document.dispatchEvent(ev);
+  }
+
+  function bindBtn(btn){
+    const key = btn.getAttribute('data-key');
+    const isTap = btn.getAttribute('data-tap') === '1';
+
+    function press(e){
+      e.preventDefault();
+      btn.classList.add('gz-pressed');
+      dispatchKey('keydown', key);
+      if(isTap){
+        setTimeout(()=>dispatchKey('keyup', key), 30);
+      }
+    }
+    function release(e){
+      if(e) e.preventDefault();
+      btn.classList.remove('gz-pressed');
+      if(!isTap) dispatchKey('keyup', key);
+    }
+
+    btn.addEventListener('touchstart', press, {passive:false});
+    btn.addEventListener('touchend', release, {passive:false});
+    btn.addEventListener('touchcancel', release, {passive:false});
+    btn.addEventListener('mousedown', press);
+    btn.addEventListener('mouseup', release);
+    btn.addEventListener('mouseleave', release);
+  }
+
+  document.querySelectorAll('#gz-touch-controls .gz-btn').forEach(bindBtn);
+
+  // ── 3. Toque na tela para avançar diálogo (Espaço) ──
+  const wrapperEl = document.querySelector('.canvas-wrapper');
+  if(wrapperEl){
+    wrapperEl.addEventListener('touchend', function(e){
+      const dlg = document.getElementById('dialogue-overlay');
+      if(dlg && dlg.classList.contains('visible')){
+        if(e.target.closest && e.target.closest('#gz-touch-controls')) return;
+        dispatchKey('keydown', ' ');
+        dispatchKey('keyup', ' ');
+      }
+    }, {passive:true});
+  }
+
+  // ── 4. Ponte de toque → eventos de mouse no canvas (drag da luneta etc.) ──
+  function bridgeTouchToMouse(canvas){
+    if(!canvas) return;
+    function touchToMouseEvent(touchEvent, type){
+      const touch = touchEvent.changedTouches[0];
+      if(!touch) return;
+      const scale = wrapperEl ? (wrapperEl._gzScale || 1) : 1;
+      const rect = canvas.getBoundingClientRect();
+      const x = (touch.clientX - rect.left) / scale;
+      const y = (touch.clientY - rect.top) / scale;
+      const mouseEvent = new MouseEvent(type, {
+        clientX: rect.left + x*scale,
+        clientY: rect.top + y*scale,
+        bubbles: true, cancelable: true
+      });
+      canvas.dispatchEvent(mouseEvent);
+    }
+    canvas.addEventListener('touchstart', e=>{ touchToMouseEvent(e,'mousedown'); }, {passive:true});
+    canvas.addEventListener('touchmove', e=>{ touchToMouseEvent(e,'mousemove'); }, {passive:true});
+    canvas.addEventListener('touchend', e=>{ touchToMouseEvent(e,'mouseup'); }, {passive:true});
+  }
+  bridgeTouchToMouse(document.getElementById('gameCanvas'));
+
+  // ── 5. Iniciar áudio no primeiro toque (política de autoplay) ──
+  function iniciarAudioTouch(){
+    if(window.GZ_Audio && typeof GZ_Audio.init==='function'){
+      GZ_Audio.init();
+      GZ_Audio.resume && GZ_Audio.resume();
+    }
+    document.removeEventListener('touchstart', iniciarAudioTouch);
+  }
+  document.addEventListener('touchstart', iniciarAudioTouch, {passive:true});
+
+  // ── 6. Corrigir cutscenes travadas no mobile (autoplay bloqueado) ──
+  // IDs conhecidos de overlays de cutscene em todo o jogo
+  const CUTSCENE_IDS = ['screen-cutscene','cutscene-intro','cutscene-drag4'];
+  const SKIP_BTN_IDS = ['skip-btn','skip-intro-btn','skip-drag4-btn'];
+
+  function cutsceneVisivel(el){
+    if(!el) return false;
+    const cs = getComputedStyle(el);
+    if(cs.display==='none') return false;
+    if(el.id==='screen-cutscene') return el.classList.contains('visible');
+    return true; // cutscene-intro/drag4 usam display flex/none
+  }
+
+  function algumaCutsceneVisivel(){
+    return CUTSCENE_IDS.some(id=>cutsceneVisivel(document.getElementById(id)));
+  }
+
+  // Esconde os controles touch enquanto uma cutscene estiver visível,
+  // pra não bloquear o botão "PULAR" por cima (z-index)
+  function atualizarVisibilidadeControles(){
+    const tc = document.getElementById('gz-touch-controls');
+    if(!tc) return;
+    tc.style.display = algumaCutsceneVisivel() ? 'none' : '';
+  }
+  setInterval(atualizarVisibilidadeControles, 250);
+
+  // Tenta retomar o play dos vídeos de cutscene no primeiro toque
+  // (autoplay sem gesto do usuário costuma falhar/ficar parado)
+  function retomarVideosCutscene(){
+    document.querySelectorAll('#screen-cutscene video, #cutscene-intro video, #cutscene-drag4 video')
+      .forEach(v=>{
+        if(v.paused && v.readyState>0){
+          v.play().catch(()=>{});
+        }
+      });
+  }
+
+  // Toque em qualquer lugar de uma cutscene visível = pular (clica no botão PULAR correspondente)
+  function tapSkipCutscene(e){
+    let pulou = false;
+    CUTSCENE_IDS.forEach((id,i)=>{
+      const el = document.getElementById(id);
+      if(cutsceneVisivel(el)){
+        const btn = document.getElementById(SKIP_BTN_IDS[i]);
+        if(btn){ btn.click(); pulou = true; }
+        else {
+          // fallback: index.html usa video.addEventListener('ended', afterCutscene)
+          const vid = el.querySelector('video');
+          if(vid){
+            vid.dispatchEvent(new Event('ended'));
+            pulou = true;
+          }
+        }
+      }
+    });
+    if(pulou) e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', function(e){
+    retomarVideosCutscene();
+    if(algumaCutsceneVisivel()) tapSkipCutscene(e);
+  }, {passive:false});
+
+  document.addEventListener('touchend', function(e){
+    if(algumaCutsceneVisivel()) tapSkipCutscene(e);
+  }, {passive:false});
+})();
 </script>
 </body>
 </html>
