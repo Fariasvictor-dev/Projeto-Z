@@ -212,20 +212,29 @@ input[type=range].cfg-slider::-moz-range-thumb{
 </style>
 <style id="gz-mobile-style">
   @media (max-width: 880px), (pointer: coarse) {
+    html, body{
+      height: 100vh;
+      height: 100dvh;
+    }
     body{
       padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
       justify-content: flex-start !important;
-      min-height: 100vh;
-      min-height: 100dvh;
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
     }
     header{
       margin-top: env(safe-area-inset-top, 8px);
       transform: scale(0.62);
       transform-origin: top center;
       margin-bottom: -10px;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
+    header h1{ white-space: nowrap; }
+    .badge{ white-space: nowrap; }
     .hint{ display:none; }
     .back-btn{
       font-size: .42rem !important;
@@ -234,27 +243,36 @@ input[type=range].cfg-slider::-moz-range-thumb{
       left: 6px !important;
       z-index: 1000 !important;
     }
+    #config-btn{
+      font-size: .42rem !important;
+      padding: 4px 8px !important;
+      top: env(safe-area-inset-top, 6px) !important;
+      right: 50px !important;
+      z-index: 998 !important;
+    }
     #gz-scale-outer{
       width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
       display:flex;
       justify-content:center;
-      align-items:flex-start;
+      align-items:center;
       overflow: hidden;
     }
     .canvas-wrapper{
-      transform-origin: top center;
+      transform-origin: center center;
       flex-shrink: 0;
     }
     #gz-touch-controls{
-      position: fixed;
-      left:0; right:0; bottom:0;
+      flex-shrink: 0;
+      width: 100%;
       display:flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: center;
       padding: 8px 10px calc(8px + env(safe-area-inset-bottom,0px));
       z-index: 999;
-      pointer-events:none;
       gap: 8px;
+      box-sizing: border-box;
     }
     #gz-touch-controls.hidden{ display:none; }
     .gz-dpad{
@@ -452,19 +470,19 @@ const MISSIONS = [
   { id:1, x:155, y:180, label:'MISSÃO 1', sub:'A GRANDE DISPUTA',
     color:'#44eebb', glow:'rgba(68,238,187,.6)',
     pColors:['#1a6655','#44eebb','#2af4c0','#0a9977'], ringCol:'rgba(68,238,187,.38)', orbitCol:'rgba(68,238,187,.15)',
-    file:'fase1.html', tipo:'planeta' },
+    file:'fase1_mobile.html', tipo:'planeta' },
   { id:2, x:295, y:355, label:'MISSÃO 2', sub:'LEIS DE KEPLER',
     color:'#e5ff00', glow:'rgba(229,255,0,.45)',
     pColors:['#445500','#aacc00','#e5ff00','#667700'], ringCol:'rgba(229,255,0,.28)', orbitCol:'rgba(229,255,0,.12)',
-    file:'fase2.html', tipo:'planeta' },
+    file:'fase2_mobile.html', tipo:'planeta' },
   { id:3, x:415, y:255, label:'MISSÃO 2B', sub:'ÓRBITAS ELÍPTICAS',
     color:'#bbccdd', glow:'rgba(180,200,220,.4)',
     pColors:['#334455','#667788','#aabbcc','#445566'], ringCol:'rgba(180,200,220,.2)', orbitCol:'rgba(180,200,220,.08)',
-    file:'fase2b.html', tipo:'lua' },
+    file:'fase2b_mobile.html', tipo:'lua' },
   { id:4, x:568, y:415, label:'MISSÃO 3', sub:'A MAÇÃ DE NEWTON',
     color:'#ff4081', glow:'rgba(255,64,129,.45)',
     pColors:['#550022','#aa0044','#ff4081','#660033'], ringCol:'rgba(255,64,129,.28)', orbitCol:'rgba(255,64,129,.12)',
-    file:'fase3.html', tipo:'planeta' },
+    file:'fase3_mobile.html', tipo:'planeta' },
 ];
 
 // ── ESTAÇÃO ESPACIAL ─────────────────────────────────
@@ -1129,23 +1147,32 @@ window.addEventListener('keydown', e=>{
       wrapper.parentNode.insertBefore(outer, wrapper);
       outer.appendChild(wrapper);
     }
+    // mede o tamanho "natural" do wrapper (sem escala aplicada)
+    const prevTransform = wrapper.style.transform;
+    wrapper.style.transform = 'none';
     const baseW = wrapper.offsetWidth || 800;
     const baseH = wrapper.offsetHeight || 550;
-    const availW = window.innerWidth - 8;
+
     const isMobile = window.matchMedia('(max-width: 880px), (pointer: coarse)').matches;
-    const reservedBottom = isMobile ? 165 : 0;
-    const reservedTop = isMobile ? 36 : 0;
-    const availH = window.innerHeight - reservedBottom - reservedTop;
+    if(!isMobile){
+      wrapper.style.transform = prevTransform || '';
+      return;
+    }
+
+    const outerRect = outer.getBoundingClientRect();
+    const availW = (outerRect.width || window.innerWidth) - 4;
+    const availH = (outerRect.height || window.innerHeight) - 4;
     const scale = Math.min(availW / baseW, availH / baseH, 1);
     wrapper.style.transform = `scale(${scale})`;
     wrapper._gzScale = scale;
-    outer.style.height = (baseH * scale) + 'px';
   }
   window.addEventListener('resize', escalarCanvas);
   window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));
   document.addEventListener('DOMContentLoaded', escalarCanvas);
   setTimeout(escalarCanvas, 50);
-  setTimeout(escalarCanvas, 400);
+  setTimeout(escalarCanvas, 200);
+  setTimeout(escalarCanvas, 500);
+  setTimeout(escalarCanvas, 1000);
 
   // ── 2. Disparar eventos de teclado sintéticos ──
   function dispatchKey(type, key){
@@ -1247,10 +1274,16 @@ window.addEventListener('keydown', e=>{
 
   // Esconde os controles touch enquanto uma cutscene estiver visível,
   // pra não bloquear o botão "PULAR" por cima (z-index)
+  let _gzControlsHidden = false;
   function atualizarVisibilidadeControles(){
     const tc = document.getElementById('gz-touch-controls');
     if(!tc) return;
-    tc.style.display = algumaCutsceneVisivel() ? 'none' : '';
+    const deveEsconder = algumaCutsceneVisivel();
+    if(deveEsconder !== _gzControlsHidden){
+      tc.style.display = deveEsconder ? 'none' : '';
+      _gzControlsHidden = deveEsconder;
+      escalarCanvas();
+    }
   }
   setInterval(atualizarVisibilidadeControles, 250);
 
