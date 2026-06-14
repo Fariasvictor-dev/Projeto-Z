@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <title>Gravitação Z — Mapa</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
@@ -216,6 +216,7 @@ input[type=range].cfg-slider::-moz-range-thumb{
       padding: 0 !important;
       justify-content: flex-start !important;
       min-height: 100vh;
+      min-height: 100dvh;
       overflow-y: auto !important;
       overflow-x: hidden !important;
     }
@@ -318,7 +319,33 @@ input[type=range].cfg-slider::-moz-range-thumb{
       color:#aaa;
       font-size:.42rem;
     }
+    #gz-fullscreen-btn{
+      position: fixed;
+      top: env(safe-area-inset-top, 6px);
+      right: 6px;
+      width: 38px; height: 38px;
+      border-radius: 8px;
+      border: 2px solid #ffe566;
+      background: rgba(10,10,25,.78);
+      color: #ffe566;
+      font-size: 1.1rem;
+      display:flex;align-items:center;justify-content:center;
+      z-index: 1000;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
     #dialogue-overlay{ touch-action: none; }
+  }
+  @media (max-width: 400px){
+    .gz-dpad{
+      grid-template-columns: 44px 44px 44px;
+      grid-template-rows: 44px 44px;
+      gap:4px;
+    }
+    .gz-btn{ width:44px; height:44px; font-size:.9rem; }
+    .gz-btn.gz-action{ width:64px; height:64px; font-size:.55rem; }
+    .gz-btn.gz-secondary{ width:44px; height:44px; }
+    .gz-btn.gz-esc{ width:38px; height:38px; }
   }
   @media (min-width: 881px) and (pointer: fine){
     #gz-touch-controls{ display:none !important; }
@@ -1071,6 +1098,7 @@ window.addEventListener('keydown', e=>{
 });
 
 </script>
+<div id="gz-fullscreen-btn" title="Tela cheia">⛶</div>
 <div id="gz-touch-controls">
   <div class="gz-dpad">
     <div class="gz-btn gz-up" data-key="ArrowUp">▲</div>
@@ -1266,6 +1294,23 @@ window.addEventListener('keydown', e=>{
   document.addEventListener('touchend', function(e){
     if(algumaCutsceneVisivel()) tapSkipCutscene(e);
   }, {passive:false});
+
+  // ── 7. Botão de tela cheia ──
+  const fsBtn = document.getElementById('gz-fullscreen-btn');
+  if(fsBtn){
+    fsBtn.addEventListener('click', function(){
+      const el = document.documentElement;
+      if(!document.fullscreenElement){
+        (el.requestFullscreen && el.requestFullscreen())
+          || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+      } else {
+        (document.exitFullscreen && document.exitFullscreen())
+          || (document.webkitExitFullscreen && document.webkitExitFullscreen());
+      }
+    });
+    document.addEventListener('fullscreenchange', ()=>setTimeout(escalarCanvas,150));
+    document.addEventListener('webkitfullscreenchange', ()=>setTimeout(escalarCanvas,150));
+  }
 })();
 </script>
 </body>
