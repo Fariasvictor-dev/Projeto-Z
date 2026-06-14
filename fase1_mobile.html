@@ -140,14 +140,15 @@ canvas{display:block}
       overflow: hidden !important;
     }
     header{
-      margin-top: env(safe-area-inset-top, 8px);
-      transform: scale(0.62);
+      margin-top: env(safe-area-inset-top, 6px);
+      transform: scale(0.55);
       transform-origin: top center;
-      margin-bottom: -10px;
+      margin-bottom: -14px;
       flex-shrink: 0;
       white-space: nowrap;
+      justify-content: center;
     }
-    header h1{ white-space: nowrap; }
+    header h1{ display: none; }
     .badge{ white-space: nowrap; }
     .hint{ display:none; }
     .back-btn{
@@ -160,8 +161,8 @@ canvas{display:block}
     #config-btn{
       font-size: .42rem !important;
       padding: 4px 8px !important;
-      top: env(safe-area-inset-top, 6px) !important;
-      right: 50px !important;
+      top: calc(env(safe-area-inset-top, 6px) + 46px) !important;
+      right: 6px !important;
       z-index: 998 !important;
     }
     #gz-scale-outer{
@@ -183,17 +184,17 @@ canvas{display:block}
       display:flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom,0px));
       z-index: 999;
-      gap: 8px;
+      gap: 6px;
       box-sizing: border-box;
     }
     #gz-touch-controls.hidden{ display:none; }
     .gz-dpad{
       display:grid;
-      grid-template-columns: 50px 50px 50px;
-      grid-template-rows: 50px 50px;
-      gap:5px;
+      grid-template-columns: 46px 46px 46px;
+      grid-template-rows: 46px 46px;
+      gap:4px;
       pointer-events:auto;
     }
     .gz-dpad .gz-btn{ grid-row: 2; }
@@ -201,19 +202,19 @@ canvas{display:block}
     .gz-extra{
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:6px;
       pointer-events:auto;
       align-items:center;
     }
     .gz-actions{
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:6px;
       pointer-events:auto;
       align-items:center;
     }
     .gz-btn{
-      width:50px;height:50px;
+      width:46px;height:46px;
       border-radius:14px;
       border:2px solid #ffe566;
       background:rgba(10,10,25,.78);
@@ -231,30 +232,44 @@ canvas{display:block}
       box-shadow:0 0 16px rgba(255,229,100,.6);
     }
     .gz-btn.gz-action{
-      width:72px;height:72px;
+      width:64px;height:64px;
       border-radius:50%;
       border-color:#ff6688;
       color:#ff6688;
-      font-size:.6rem;
+      font-size:.55rem;
     }
     .gz-btn.gz-secondary{
-      width:50px;height:50px;
+      width:46px;height:46px;
       border-radius:50%;
       border-color:#4488ff;
       color:#4488ff;
       font-size:.5rem;
     }
-    .gz-btn.gz-esc{
-      width:42px;height:42px;
-      border-radius:8px;
-      border-color:#888;
-      color:#aaa;
-      font-size:.42rem;
-    }
-    #gz-fullscreen-btn{
+    #gz-top-bar{
       position: fixed;
       top: env(safe-area-inset-top, 6px);
       right: 6px;
+      display: flex;
+      gap: 6px;
+      z-index: 1000;
+    }
+    .gz-esc-top{
+      width:38px;height:38px;
+      border-radius:8px;
+      border:2px solid #888;
+      color:#aaa;
+      background:rgba(10,10,25,.78);
+      font-family:'Press Start 2P',monospace;
+      font-size:.42rem;
+      display:flex;align-items:center;justify-content:center;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      touch-action: none;
+    }
+    .gz-esc-top:active, .gz-esc-top.gz-pressed{
+      background:rgba(255,255,255,.12);
+    }
+    #gz-fullscreen-btn{
       width: 38px; height: 38px;
       border-radius: 8px;
       border: 2px solid #ffe566;
@@ -262,7 +277,6 @@ canvas{display:block}
       color: #ffe566;
       font-size: 1.1rem;
       display:flex;align-items:center;justify-content:center;
-      z-index: 1000;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
@@ -270,14 +284,13 @@ canvas{display:block}
   }
   @media (max-width: 400px){
     .gz-dpad{
-      grid-template-columns: 44px 44px 44px;
-      grid-template-rows: 44px 44px;
+      grid-template-columns: 42px 42px 42px;
+      grid-template-rows: 42px 42px;
       gap:4px;
     }
-    .gz-btn{ width:44px; height:44px; font-size:.9rem; }
-    .gz-btn.gz-action{ width:64px; height:64px; font-size:.55rem; }
-    .gz-btn.gz-secondary{ width:44px; height:44px; }
-    .gz-btn.gz-esc{ width:38px; height:38px; }
+    .gz-btn{ width:42px; height:42px; font-size:.85rem; }
+    .gz-btn.gz-action{ width:58px; height:58px; font-size:.5rem; }
+    .gz-btn.gz-secondary{ width:42px; height:42px; }
   }
   @media (min-width: 881px) and (pointer: fine){
     #gz-touch-controls{ display:none !important; }
@@ -944,7 +957,10 @@ function loop(){
 }
 loop();
 </script>
-<div id="gz-fullscreen-btn" title="Tela cheia">⛶</div>
+<div id="gz-top-bar">
+  <div id="gz-esc-btn-top" class="gz-esc-top" data-key="Escape" data-tap="1" title="ESC">ESC</div>
+  <div id="gz-fullscreen-btn" title="Tela cheia">⛶</div>
+</div>
 <div id="gz-touch-controls">
   <div class="gz-dpad">
     <div class="gz-btn gz-up" data-key="ArrowUp">▲</div>
@@ -953,7 +969,6 @@ loop();
     <div class="gz-btn gz-right" data-key="ArrowRight">▶</div>
   </div>
   <div class="gz-extra">
-    <div class="gz-btn gz-esc" data-key="Escape" data-tap="1" title="ESC">ESC</div>
     <div class="gz-btn gz-secondary" data-key="r" data-tap="1" title="R">R</div>
   </div>
   <div class="gz-actions">
@@ -1035,7 +1050,7 @@ loop();
     btn.addEventListener('mouseleave', release);
   }
 
-  document.querySelectorAll('#gz-touch-controls .gz-btn').forEach(bindBtn);
+  document.querySelectorAll('#gz-touch-controls .gz-btn, #gz-esc-btn-top').forEach(bindBtn);
 
   // ── 3. Toque na tela para avançar diálogo (Espaço) ──
   const wrapperEl = document.querySelector('.canvas-wrapper');
