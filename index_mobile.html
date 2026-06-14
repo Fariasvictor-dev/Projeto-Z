@@ -277,7 +277,7 @@ body::before{
       <div class="panel-corner bl"></div><div class="panel-corner br"></div>
 
       <button class="btn btn-primary" id="btn-novo">▶ NOVA JORNADA</button>
-      <a class="btn btn-secondary" href="mapa.html" id="btn-continuar" onclick="GZ_Audio.btnClick()">↩ CONTINUAR</a>
+      <a class="btn btn-secondary" href="mapa_mobile.html" id="btn-continuar" onclick="GZ_Audio.btnClick()">↩ CONTINUAR</a>
       <button class="btn btn-disabled" disabled>⚙ CONFIGURAÇÕES</button>
 
       <div class="save-badge" id="save-badge">SEM SAVE ENCONTRADO</div>
@@ -315,7 +315,7 @@ function afterCutscene(){
   setTimeout(()=>{
     screenCutscene.style.display='none';
     if(cutsceneDestino === 'mapa'){
-      window.location.href = 'mapa.html';
+      window.location.href = 'mapa_mobile.html';
     } else {
       screenCover.style.display='none';
       screenMenu.classList.add('visible');

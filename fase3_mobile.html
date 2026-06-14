@@ -344,7 +344,7 @@
 </style>
 </head>
 <body>
-<a class="back-btn" href="mapa.html" onclick="GZ_Audio&&GZ_Audio.btnClick()">◀ MAPA</a>
+<a class="back-btn" href="mapa_mobile.html" onclick="GZ_Audio&&GZ_Audio.btnClick()">◀ MAPA</a>
 <header>
   <h1>GRAVITAÇÃO Z</h1>
   <span class="badge">MISSÃO 3 · A MAÇÃ DE NEWTON</span>
@@ -512,7 +512,7 @@ function processarM3(t){
           '🌍 A gravidade conecta a maçã ao cosmos!<br><br>'+
           '<span style="color:#88ff66">✦ TODAS AS MISSÕES CONCLUÍDAS! ✦</span>';
         document.getElementById('victory-banner').classList.add('visible');
-        document.getElementById('victory-btn').onclick=()=>{GZ_Audio&&GZ_Audio.btnClick();window.location.href='mapa.html';};
+        document.getElementById('victory-btn').onclick=()=>{GZ_Audio&&GZ_Audio.btnClick();window.location.href='mapa_mobile.html';};
         estadoJogo="FASE_3_VITORIA";
       },"JOGADOR");
     },600);

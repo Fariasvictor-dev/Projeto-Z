@@ -170,7 +170,7 @@ canvas{display:block}
 </style>
 </head>
 <body>
-<a class="back-btn" href="mapa.html" onclick="GZ_Audio&&GZ_Audio.btnClick()">◀ MAPA</a>
+<a class="back-btn" href="mapa_mobile.html" onclick="GZ_Audio&&GZ_Audio.btnClick()">◀ MAPA</a>
 <header><h1>GRAVITAÇÃO Z</h1><span class="badge">FASE 3B · O CANHÃO DE NEWTON</span></header>
 <div class="canvas-wrapper">
   <canvas id="C" width="800" height="550"></canvas>
@@ -368,7 +368,7 @@ function mostrarResultado(titulo, texto, vitoria){
     const btn=ov.querySelector('.ov-btn');
     if(vitoria){
       btn.textContent='✓ CONTINUAR';
-      btn.onclick=()=>{ const p=carregarProgresso();p.fase3b_completa=true;salvarProgresso(p);window.location.href='mapa.html'; };
+      btn.onclick=()=>{ const p=carregarProgresso();p.fase3b_completa=true;salvarProgresso(p);window.location.href='mapa_mobile.html'; };
     } else if(tentativas>=maxTentativas){
       btn.textContent='↺ RECOMEÇAR';
       btn.onclick=()=>{ tentativas=0;ov.classList.remove('visible');estado='AJUSTE';bala=null;rastro=[];};

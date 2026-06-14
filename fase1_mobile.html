@@ -268,7 +268,7 @@ canvas{display:block}
 </head>
 <body>
 
-<a class="back-btn" href="mapa.html">◀ MAPA</a>
+<a class="back-btn" href="mapa_mobile.html">◀ MAPA</a>
 
 <header>
   <h1>GRAVITAÇÃO Z</h1>
@@ -649,7 +649,7 @@ function mostrarVitoria(){
     '☀️ O modelo Heliocêntrico triunfa!<br><br>'+
     '<span style="color:#44eebb">🗺️ MISSÃO 2 — LEIS DE KEPLER — DESBLOQUEADA!</span>';
   document.getElementById('victory-banner').classList.add('visible');
-  document.getElementById('victory-btn').onclick=()=>{ GZ_Audio.btnClick(); window.location.href='mapa.html'; };
+  document.getElementById('victory-btn').onclick=()=>{ GZ_Audio.btnClick(); window.location.href='mapa_mobile.html'; };
 }
 
 function mostrarDerrota(){
@@ -659,7 +659,7 @@ function mostrarDerrota(){
 }
 
 document.getElementById('retry-btn').onclick=()=>{ GZ_Audio.btnClick(); inicializarLuta(); };
-document.getElementById('map-btn-defeat').onclick=()=>{ GZ_Audio.btnClick(); window.location.href='mapa.html'; };
+document.getElementById('map-btn-defeat').onclick=()=>{ GZ_Audio.btnClick(); window.location.href='mapa_mobile.html'; };
 
 // ── CONTROLES ──────────────────────────────────────────
 const keys={};
