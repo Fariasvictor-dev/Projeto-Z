@@ -76,6 +76,7 @@ canvas{display:block}
       justify-content:center;
       align-items:center;
       overflow: hidden;
+      position: relative;
     }
     .canvas-wrapper{
       transform-origin: center center;
@@ -197,6 +198,61 @@ canvas{display:block}
   }
   @media (min-width: 881px) and (pointer: fine){
     #gz-touch-controls{ display:none !important; }
+    #gz-top-bar{ display:none !important; }
+  }
+
+  /* ── MODO PAISAGEM FORÇADO (celular em retrato) ── */
+  body.gz-rotated{
+    overflow: hidden !important;
+  }
+  body.gz-rotated header,
+  body.gz-rotated .back-btn,
+  body.gz-rotated #config-btn,
+  body.gz-rotated .hint{
+    display: none !important;
+  }
+  body.gz-rotated #gz-scale-outer{
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+    padding-left: 70px !important;
+    padding-right: 46px !important;
+  }
+  body.gz-rotated .canvas-wrapper{
+    transform-origin: center center;
+  }
+  body.gz-rotated #gz-touch-controls{
+    position: fixed !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    left: auto !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    padding: calc(8px + env(safe-area-inset-top,0px)) 8px calc(8px + env(safe-area-inset-bottom,0px)) 6px !important;
+    box-sizing: border-box !important;
+    gap: 0 !important;
+    z-index: 999;
+  }
+  /* lado esquerdo (D-pad) fica na borda física esquerda do celular */
+  body.gz-rotated.gz-rot-cw #gz-touch-controls{ left:0 !important; right:auto !important; }
+  body.gz-rotated.gz-rot-ccw #gz-touch-controls{ right:0 !important; left:auto !important; }
+  body.gz-rotated .gz-dpad{
+    grid-template-columns: 34px 34px 34px;
+    grid-template-rows: 34px 34px;
+    gap:3px;
+  }
+  body.gz-rotated .gz-btn{ width:34px; height:34px; font-size:.7rem; border-radius:10px; }
+  body.gz-rotated .gz-btn.gz-action{ width:46px; height:46px; font-size:.42rem; }
+  body.gz-rotated .gz-btn.gz-secondary{ width:34px; height:34px; }
+  body.gz-rotated #gz-top-bar{
+    top: 6px !important;
+    right: 6px !important;
   }
 </style>
 </head>
@@ -758,7 +814,7 @@ GC.addEventListener('click',tentarSalto);
 
 <script id="gz-mobile-script">
 (function(){
-  // ── 1. Escalonar o canvas-wrapper para caber na tela ──
+  // ── 1. Escalonar (e rotacionar em retrato) o canvas-wrapper ──
   function escalarCanvas(){
     const wrapper = document.querySelector('.canvas-wrapper');
     if(!wrapper) return;
@@ -769,24 +825,49 @@ GC.addEventListener('click',tentarSalto);
       wrapper.parentNode.insertBefore(outer, wrapper);
       outer.appendChild(wrapper);
     }
-    // mede o tamanho "natural" do wrapper (sem escala aplicada)
+
+    const isMobile = window.matchMedia('(max-width: 880px), (pointer: coarse)').matches;
+
+    if(!isMobile){
+      document.body.classList.remove('gz-rotated','gz-rot-cw','gz-rot-ccw');
+      wrapper.style.transform = '';
+      return;
+    }
+
+    // mede o tamanho "natural" do wrapper (sem escala/rotação aplicada)
     const prevTransform = wrapper.style.transform;
     wrapper.style.transform = 'none';
     const baseW = wrapper.offsetWidth || 800;
     const baseH = wrapper.offsetHeight || 550;
 
-    const isMobile = window.matchMedia('(max-width: 880px), (pointer: coarse)').matches;
-    if(!isMobile){
-      wrapper.style.transform = prevTransform || '';
-      return;
-    }
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isPortrait = vh > vw;
 
-    const outerRect = outer.getBoundingClientRect();
-    const availW = (outerRect.width || window.innerWidth) - 4;
-    const availH = (outerRect.height || window.innerHeight) - 4;
-    const scale = Math.min(availW / baseW, availH / baseH, 1);
-    wrapper.style.transform = `scale(${scale})`;
-    wrapper._gzScale = scale;
+    if(isPortrait){
+      // Gira o jogo 90° para usar a tela como paisagem
+      document.body.classList.add('gz-rotated','gz-rot-cw');
+      document.body.classList.remove('gz-rot-ccw');
+      // após rotação de 90°, a largura disponível = altura da viewport,
+      // e a altura disponível = largura da viewport menos margens p/ controles
+      const reservedLeft = 70;  // D-pad
+      const reservedRight = 46; // R / ENT / SOCO
+      const availW = vh - 4;
+      const availH = (vw - reservedLeft - reservedRight) - 4;
+      const scale = Math.min(availW / baseW, availH / baseH, 1);
+      wrapper.style.transform = `rotate(90deg) scale(${scale})`;
+      wrapper._gzScale = scale;
+      wrapper._gzRotated = true;
+    } else {
+      document.body.classList.remove('gz-rotated','gz-rot-cw','gz-rot-ccw');
+      wrapper._gzRotated = false;
+      const outerRect = outer.getBoundingClientRect();
+      const availW = (outerRect.width || vw) - 4;
+      const availH = (outerRect.height || vh) - 4;
+      const scale = Math.min(availW / baseW, availH / baseH, 1);
+      wrapper.style.transform = `scale(${scale})`;
+      wrapper._gzScale = scale;
+    }
   }
   window.addEventListener('resize', escalarCanvas);
   window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));
@@ -850,13 +931,27 @@ GC.addEventListener('click',tentarSalto);
     function touchToMouseEvent(touchEvent, type){
       const touch = touchEvent.changedTouches[0];
       if(!touch) return;
-      const scale = wrapperEl ? (wrapperEl._gzScale || 1) : 1;
       const rect = canvas.getBoundingClientRect();
-      const x = (touch.clientX - rect.left) / scale;
-      const y = (touch.clientY - rect.top) / scale;
+      let clientX, clientY;
+
+      if(wrapperEl && wrapperEl._gzRotated){
+        // canvas está rotacionado 90° (rect.width/height já refletem a rotação)
+        const scale = wrapperEl._gzScale || 1;
+        const rx = (touch.clientX - rect.left) / scale; // ao longo do eixo Y local do canvas
+        const ry = (touch.clientY - rect.top) / scale;  // ao longo do eixo X local do canvas
+        const H = canvas.height; // altura original do canvas (pré-rotação), em px do canvas
+        const xLocal = ry;
+        const yLocal = H - rx;
+        clientX = rect.left + (xLocal / canvas.width)  * rect.width;
+        clientY = rect.top  + (yLocal / canvas.height) * rect.height;
+      } else {
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+      }
+
       const mouseEvent = new MouseEvent(type, {
-        clientX: rect.left + x*scale,
-        clientY: rect.top + y*scale,
+        clientX: clientX,
+        clientY: clientY,
         bubbles: true, cancelable: true
       });
       canvas.dispatchEvent(mouseEvent);
