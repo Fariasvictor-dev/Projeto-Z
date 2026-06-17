@@ -27,7 +27,7 @@ header h1{
   color:#ffe566;text-shadow:0 0 10px #ffe566,0 0 22px #ff9900;
 }
 .badge{font-size:.55rem;letter-spacing:.15em;padding:2px 8px;border:1px solid #00e5ff;color:#00e5ff}
-.canvas-wrapper{position:relative;}
+.canvas-wrapper{position:relative;border:2px solid #1e2a3a;box-shadow:0 0 50px rgba(100,60,220,.18)}
 canvas{display:block}
 .hint{margin-top:8px;font-size:.6rem;color:#4a5a6a;letter-spacing:.1em}
 .back-btn{
@@ -212,37 +212,30 @@ input[type=range].cfg-slider::-moz-range-thumb{
 </style>
 <style id="gz-mobile-style">
   @media (max-width: 880px), (pointer: coarse) {
-    /* ── TELA CHEIA: canvas preenche tudo ── */
     html, body {
       width: 100vw; height: 100vh; height: 100dvh;
-      margin: 0; padding: 0;
-      overflow: hidden;
+      margin: 0; padding: 0; overflow: hidden;
     }
     header, .hint, .back-btn, #config-btn { display: none !important; }
 
-    /* O wrapper do canvas ocupa toda a tela */
+    /* Canvas container fullscreen */
     #gz-scale-outer {
       position: fixed !important;
       inset: 0 !important;
       width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
+      height: 100vh !important; height: 100dvh !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       overflow: hidden !important;
     }
-    .canvas-wrapper {
-      transform-origin: center center;
-      flex-shrink: 0;
-    }
+    .canvas-wrapper { transform-origin: center center; flex-shrink: 0; }
 
-    /* ── CONTROLES: sobrepostos DENTRO da tela ── */
+    /* Controles sobrepostos DENTRO da tela */
     #gz-touch-controls {
       position: fixed !important;
       bottom: env(safe-area-inset-bottom, 10px) !important;
-      left: 0 !important;
-      right: 0 !important;
+      left: 0 !important; right: 0 !important;
       width: 100vw !important;
       display: flex !important;
       justify-content: space-between !important;
@@ -257,128 +250,89 @@ input[type=range].cfg-slider::-moz-range-thumb{
 
     .gz-dpad {
       display: grid;
-      grid-template-columns: 50px 50px 50px;
-      grid-template-rows: 50px 50px;
+      grid-template-columns: 52px 52px 52px;
+      grid-template-rows: 52px 52px;
       gap: 4px;
     }
     .gz-dpad .gz-btn { grid-row: 2; }
     .gz-dpad .gz-up  { grid-row: 1; grid-column: 2; }
-
-    .gz-extra {
-      display: flex; flex-direction: column;
-      gap: 6px; align-items: center;
-    }
-    .gz-actions {
-      display: flex; flex-direction: column;
-      gap: 6px; align-items: center;
-    }
+    .gz-extra  { display:flex; flex-direction:column; gap:6px; align-items:center; }
+    .gz-actions{ display:flex; flex-direction:column; gap:6px; align-items:center; }
     .gz-btn {
-      width: 50px; height: 50px;
-      border-radius: 14px;
-      border: 2px solid #ffe566;
-      background: rgba(10,10,25,.72);
-      color: #ffe566;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 1.1rem;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 10px rgba(255,229,100,.25);
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: none;
+      width:52px; height:52px; border-radius:14px;
+      border:2px solid #ffe566; background:rgba(10,10,25,.75);
+      color:#ffe566; font-family:'Press Start 2P',monospace; font-size:1.1rem;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 0 10px rgba(255,229,100,.25);
+      user-select:none; -webkit-tap-highlight-color:transparent; touch-action:none;
     }
-    .gz-btn:active, .gz-btn.gz-pressed {
-      background: rgba(255,229,100,.28);
-      box-shadow: 0 0 16px rgba(255,229,100,.6);
-    }
-    .gz-btn.gz-action {
-      width: 68px; height: 68px;
-      border-radius: 50%;
-      border-color: #ff6688; color: #ff6688;
-      font-size: .55rem;
-    }
-    .gz-btn.gz-secondary {
-      width: 50px; height: 50px;
-      border-radius: 50%;
-      border-color: #4488ff; color: #4488ff;
-      font-size: .5rem;
-    }
+    .gz-btn:active,.gz-btn.gz-pressed{ background:rgba(255,229,100,.28); box-shadow:0 0 16px rgba(255,229,100,.6); }
+    .gz-btn.gz-action   { width:68px;height:68px;border-radius:50%;border-color:#ff6688;color:#ff6688;font-size:.55rem; }
+    .gz-btn.gz-secondary{ width:52px;height:52px;border-radius:50%;border-color:#4488ff;color:#4488ff;font-size:.5rem; }
 
-    /* Top-bar: ESC e fullscreen no canto superior direito */
     #gz-top-bar {
-      position: fixed;
-      top: env(safe-area-inset-top, 6px);
-      right: 6px;
-      display: flex; gap: 6px;
-      z-index: 1000;
+      position:fixed; top:env(safe-area-inset-top,6px); right:6px;
+      display:flex; gap:6px; z-index:1000;
     }
     .gz-esc-top {
-      width: 38px; height: 38px; border-radius: 8px;
-      border: 2px solid #888; color: #aaa;
-      background: rgba(10,10,25,.78);
-      font-family: 'Press Start 2P', monospace; font-size: .42rem;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none; touch-action: none;
+      width:40px;height:40px;border-radius:8px;border:2px solid #888;color:#aaa;
+      background:rgba(10,10,25,.78);font-family:'Press Start 2P',monospace;font-size:.44rem;
+      display:flex;align-items:center;justify-content:center;
+      -webkit-tap-highlight-color:transparent;user-select:none;touch-action:none;
     }
-    .gz-esc-top:active, .gz-esc-top.gz-pressed { background: rgba(255,255,255,.12); }
-    #gz-fullscreen-btn {
-      width: 38px; height: 38px; border-radius: 8px;
-      border: 2px solid #ffe566; background: rgba(10,10,25,.78);
-      color: #ffe566; font-size: 1.1rem;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent; user-select: none;
+    .gz-esc-top:active,.gz-esc-top.gz-pressed{ background:rgba(255,255,255,.12); }
+    #gz-fullscreen-btn{
+      width:40px;height:40px;border-radius:8px;border:2px solid #ffe566;
+      background:rgba(10,10,25,.78);color:#ffe566;font-size:1.1rem;
+      display:flex;align-items:center;justify-content:center;
+      -webkit-tap-highlight-color:transparent;user-select:none;
     }
-    #dialogue-overlay { touch-action: none; }
+    #dialogue-overlay{ touch-action:none; }
   }
 
-  @media (min-width: 881px) and (pointer: fine){
-    #gz-touch-controls { display: none !important; }
-    #gz-top-bar        { display: none !important; }
+  @media (min-width:881px) and (pointer:fine){
+    #gz-touch-controls{ display:none !important; }
+    #gz-top-bar       { display:none !important; }
   }
 
-  /* ── MODO RETRATO: rotaciona 90° e preenche tudo ── */
-  body.gz-rotated { overflow: hidden !important; }
+  /* ── MODO RETRATO (celular em pé → rotaciona 90°) ── */
+  body.gz-rotated { overflow:hidden !important; }
   body.gz-rotated header,
   body.gz-rotated .back-btn,
   body.gz-rotated #config-btn,
-  body.gz-rotated .hint { display: none !important; }
+  body.gz-rotated .hint { display:none !important; }
 
   body.gz-rotated #gz-scale-outer {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important; height: 100dvh !important;
-    padding: 0 !important;
-    flex: none !important;
+    position:fixed !important; inset:0 !important;
+    width:100vw !important; height:100vh !important; height:100dvh !important;
+    padding:0 !important; flex:none !important;
   }
-  body.gz-rotated .canvas-wrapper { transform-origin: center center; }
+  body.gz-rotated .canvas-wrapper{ transform-origin:center center; }
 
-  /* Controles ficam nas laterais em modo retrato */
+  /* Controles laterais em retrato */
   body.gz-rotated #gz-touch-controls {
-    position: fixed !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    bottom: 0 !important;
-    width: auto !important;
-    height: 100vh !important; height: 100dvh !important;
-    padding: 12px 8px 12px 6px !important;
-    box-sizing: border-box !important;
-    gap: 0 !important;
-    z-index: 999 !important;
+    position:fixed !important; flex-direction:column !important;
+    justify-content:space-between !important;
+    bottom:0 !important; width:auto !important;
+    height:100vh !important; height:100dvh !important;
+    padding:12px 8px 12px 6px !important;
+    box-sizing:border-box !important; gap:0 !important; z-index:999 !important;
+    pointer-events:none !important;
   }
-  body.gz-rotated.gz-rot-cw  #gz-touch-controls { left: 0 !important; right: auto !important; }
-  body.gz-rotated.gz-rot-ccw #gz-touch-controls { right: 0 !important; left: auto !important; }
-  body.gz-rotated .gz-dpad {
-    grid-template-columns: 36px 36px 36px;
-    grid-template-rows: 36px 36px; gap: 3px;
-  }
-  body.gz-rotated .gz-btn { width: 36px; height: 36px; font-size: .75rem; border-radius: 10px; }
-  body.gz-rotated .gz-btn.gz-action   { width: 50px; height: 50px; font-size: .44rem; }
-  body.gz-rotated .gz-btn.gz-secondary{ width: 36px; height: 36px; }
+  body.gz-rotated #gz-touch-controls > * { pointer-events:auto; }
+  body.gz-rotated.gz-rot-cw  #gz-touch-controls{ left:0 !important; right:auto !important; }
+  body.gz-rotated.gz-rot-ccw #gz-touch-controls{ right:0 !important; left:auto !important; }
+  body.gz-rotated .gz-dpad{ grid-template-columns:38px 38px 38px; grid-template-rows:38px 38px; gap:3px; }
+  body.gz-rotated .gz-btn{ width:38px;height:38px;font-size:.75rem;border-radius:10px; }
+  body.gz-rotated .gz-btn.gz-action   { width:52px;height:52px;font-size:.44rem; }
+  body.gz-rotated .gz-btn.gz-secondary{ width:38px;height:38px; }
   body.gz-rotated #gz-top-bar{
-    top: 6px !important;
-    right: 6px !important;
+    top: auto !important; bottom:6px !important;
+    right: auto !important;
+    flex-direction:column; gap:6px;
   }
+  body.gz-rotated.gz-rot-cw  #gz-top-bar{ right:6px !important; left:auto !important; }
+  body.gz-rotated.gz-rot-ccw #gz-top-bar{ left:6px !important;  right:auto !important; }
 </style>
 </head>
 <body>
@@ -1150,11 +1104,9 @@ window.addEventListener('keydown', e=>{
 <script id="gz-mobile-script">
 (function(){
   // ── 1. Escalonar (e rotacionar em retrato) o canvas-wrapper ──
-  function escalarCanvas(){
+    function escalarCanvas(){
     const wrapper = document.querySelector('.canvas-wrapper');
     if(!wrapper) return;
-
-    // Garante o container outer
     let outer = document.getElementById('gz-scale-outer');
     if(!outer){
       outer = document.createElement('div');
@@ -1170,36 +1122,30 @@ window.addEventListener('keydown', e=>{
       return;
     }
 
-    // Tamanho original do canvas (sem escala)
     const baseW = 800;
     const baseH = 550;
-
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const isPortrait = vh > vw;
 
     if(isPortrait){
-      // Celular em pé → gira 90° CW
+      // Celular em pé: gira 90° CW, escala uniforme para preencher tela
       document.body.classList.add('gz-rotated','gz-rot-cw');
       document.body.classList.remove('gz-rot-ccw');
-      // Após rotação: largura visual = vh, altura visual = vw
-      // Controles ficam nas laterais (já em fixed), não tiram espaço do canvas
-      const scaleX = vh / baseW;
-      const scaleY = vw / baseH;
-      wrapper.style.transform = `rotate(90deg) scale(${scaleX}, ${scaleY})`;
-      wrapper._gzScaleX = scaleX;
-      wrapper._gzScaleY = scaleY;
+      // Após rotação: eixo W vira vh, eixo H vira vw
+      const scale = Math.min(vh / baseW, vw / baseH);
+      wrapper.style.transform = `rotate(90deg) scale(${scale})`;
+      wrapper._gzScaleX = scale;
+      wrapper._gzScaleY = scale;
       wrapper._gzRotated = true;
     } else {
-      // Celular deitado → escala direta para 100vw × 100vh
+      // Celular deitado: escala uniforme preenchendo tudo
       document.body.classList.remove('gz-rotated','gz-rot-cw','gz-rot-ccw');
       wrapper._gzRotated = false;
-      // Controles são fixed/overlay, não tiram espaço — canvas preenche tudo
-      const scaleX = vw / baseW;
-      const scaleY = vh / baseH;
-      wrapper.style.transform = `scale(${scaleX}, ${scaleY})`;
-      wrapper._gzScaleX = scaleX;
-      wrapper._gzScaleY = scaleY;
+      const scale = Math.min(vw / baseW, vh / baseH);
+      wrapper.style.transform = `scale(${scale})`;
+      wrapper._gzScaleX = scale;
+      wrapper._gzScaleY = scale;
     }
   }
   window.addEventListener('resize', escalarCanvas);
