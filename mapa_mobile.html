@@ -27,7 +27,7 @@ header h1{
   color:#ffe566;text-shadow:0 0 10px #ffe566,0 0 22px #ff9900;
 }
 .badge{font-size:.55rem;letter-spacing:.15em;padding:2px 8px;border:1px solid #00e5ff;color:#00e5ff}
-.canvas-wrapper{position:relative;border:2px solid #1e2a3a;box-shadow:0 0 50px rgba(100,60,220,.18)}
+.canvas-wrapper{position:relative;}
 canvas{display:block}
 .hint{margin-top:8px;font-size:.6rem;color:#4a5a6a;letter-spacing:.1em}
 .back-btn{
@@ -226,16 +226,8 @@ input[type=range].cfg-slider::-moz-range-thumb{
       overflow: hidden !important;
     }
     header{
-      margin-top: env(safe-area-inset-top, 6px);
-      transform: scale(0.55);
-      transform-origin: top center;
-      margin-bottom: -14px;
-      flex-shrink: 0;
-      white-space: nowrap;
-      justify-content: center;
+      display: none !important;
     }
-    header h1{ display: none; }
-    .badge{ white-space: nowrap; }
     .hint{ display:none; }
     .back-btn{
       font-size: .42rem !important;
@@ -404,6 +396,8 @@ input[type=range].cfg-slider::-moz-range-thumb{
     box-sizing: border-box !important;
     padding-left: 70px !important;
     padding-right: 46px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
   body.gz-rotated .canvas-wrapper{
     transform-origin: center center;
@@ -1241,25 +1235,32 @@ window.addEventListener('keydown', e=>{
       // Gira o jogo 90° para usar a tela como paisagem
       document.body.classList.add('gz-rotated','gz-rot-cw');
       document.body.classList.remove('gz-rot-ccw');
-      // após rotação de 90°, a largura disponível = altura da viewport,
-      // e a altura disponível = largura da viewport menos margens p/ controles
+      // Após rotação de 90°: largura disponível = vh, altura disponível = vw (descontando controles)
       const reservedLeft = 70;  // D-pad
       const reservedRight = 46; // R / ENT / SOCO
-      const availW = vh - 4;
-      const availH = (vw - reservedLeft - reservedRight) - 4;
-      const scale = Math.min(availW / baseW, availH / baseH, 1);
-      wrapper.style.transform = `rotate(90deg) scale(${scale})`;
-      wrapper._gzScale = scale;
+      const availW = vh;
+      const availH = vw - reservedLeft - reservedRight;
+      const scaleX = availW / baseW;
+      const scaleY = availH / baseH;
+      wrapper.style.transform = `rotate(90deg) scale(${scaleX}, ${scaleY})`;
+      wrapper._gzScaleX = scaleX;
+      wrapper._gzScaleY = scaleY;
       wrapper._gzRotated = true;
     } else {
       document.body.classList.remove('gz-rotated','gz-rot-cw','gz-rot-ccw');
       wrapper._gzRotated = false;
-      const outerRect = outer.getBoundingClientRect();
-      const availW = (outerRect.width || vw) - 4;
-      const availH = (outerRect.height || vh) - 4;
-      const scale = Math.min(availW / baseW, availH / baseH, 1);
-      wrapper.style.transform = `scale(${scale})`;
-      wrapper._gzScale = scale;
+      const tc = document.getElementById('gz-touch-controls');
+      const tcH = (tc && tc.offsetHeight) ? tc.offsetHeight : 0;
+      const availW = vw;
+      const availH = vh - tcH;
+      outer.style.width  = availW + 'px';
+      outer.style.height = availH + 'px';
+      outer.style.flex   = 'none';
+      const scaleX = availW / baseW;
+      const scaleY = availH / baseH;
+      wrapper.style.transform = `scale(${scaleX}, ${scaleY})`;
+      wrapper._gzScaleX = scaleX;
+      wrapper._gzScaleY = scaleY;
     }
   }
   window.addEventListener('resize', escalarCanvas);
@@ -1328,13 +1329,14 @@ window.addEventListener('keydown', e=>{
       let clientX, clientY;
 
       if(wrapperEl && wrapperEl._gzRotated){
-        // canvas está rotacionado 90° (rect.width/height já refletem a rotação)
-        const scale = wrapperEl._gzScale || 1;
-        const rx = (touch.clientX - rect.left) / scale; // ao longo do eixo Y local do canvas
-        const ry = (touch.clientY - rect.top) / scale;  // ao longo do eixo X local do canvas
-        const H = canvas.height; // altura original do canvas (pré-rotação), em px do canvas
-        const xLocal = ry;
-        const yLocal = H - rx;
+        // canvas está rotacionado 90° com escala não-uniforme (rect já reflete isso)
+        const sx = wrapperEl._gzScaleX || 1;
+        const sy = wrapperEl._gzScaleY || 1;
+        const rx = touch.clientX - rect.left;
+        const ry = touch.clientY - rect.top;
+        const H = canvas.height; // altura original do canvas (pré-rotação)
+        const xLocal = ry / sx;
+        const yLocal = H - (rx / sy);
         clientX = rect.left + (xLocal / canvas.width)  * rect.width;
         clientY = rect.top  + (yLocal / canvas.height) * rect.height;
       } else {
