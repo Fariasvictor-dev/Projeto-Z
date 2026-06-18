@@ -929,21 +929,36 @@ GC.addEventListener('click',tentarSalto);
     if(algumaCutsceneVisivel()) tapSkipCutscene(e);
   }, {passive:false});
 
-  // ── 7. Botão de tela cheia ──
+  // ── 7. Tela cheia persistente entre páginas ──
   const fsBtn = document.getElementById('gz-fullscreen-btn');
+  function entrarFullscreen(){
+    const el = document.documentElement;
+    const p = (el.requestFullscreen && el.requestFullscreen())
+           || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+    if(p && p.then) p.then(()=>sessionStorage.setItem('gz_fs','1')).catch(()=>{});
+    else sessionStorage.setItem('gz_fs','1');
+  }
+  function sairFullscreen(){
+    sessionStorage.removeItem('gz_fs');
+    (document.exitFullscreen && document.exitFullscreen())
+      || (document.webkitExitFullscreen && document.webkitExitFullscreen());
+  }
+  function atualizarIconeFS(){
+    if(!fsBtn) return;
+    fsBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+  }
   if(fsBtn){
     fsBtn.addEventListener('click', function(){
-      const el = document.documentElement;
-      if(!document.fullscreenElement){
-        (el.requestFullscreen && el.requestFullscreen())
-          || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
-      } else {
-        (document.exitFullscreen && document.exitFullscreen())
-          || (document.webkitExitFullscreen && document.webkitExitFullscreen());
-      }
+      document.fullscreenElement ? sairFullscreen() : entrarFullscreen();
     });
-    document.addEventListener('fullscreenchange', ()=>setTimeout(escalarCanvas,150));
-    document.addEventListener('webkitfullscreenchange', ()=>setTimeout(escalarCanvas,150));
+    document.addEventListener('fullscreenchange', ()=>{ atualizarIconeFS(); setTimeout(escalarCanvas,150); });
+    document.addEventListener('webkitfullscreenchange', ()=>{ atualizarIconeFS(); setTimeout(escalarCanvas,150); });
+  }
+  // Reativar fullscreen ao entrar na página se estava ativo antes
+  if(sessionStorage.getItem('gz_fs') === '1' && !document.fullscreenElement){
+    document.addEventListener('DOMContentLoaded', ()=>{
+      setTimeout(()=>{ if(!document.fullscreenElement) entrarFullscreen(); }, 300);
+    }, {once:true});
   }
 })();
 </script>

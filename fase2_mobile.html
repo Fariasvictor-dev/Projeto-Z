@@ -665,7 +665,7 @@ function desenharLuneta(t){
     ctx.restore();
   }
   const lx=m2.lunetaX,ly=m2.lunetaY,lr=m2.lunetaRaio;
-  ctx.save();ctx.fillStyle='rgba(2,2,12,.92)';ctx.beginPath();ctx.rect(0,0,W,H);ctx.arc(lx,ly,lr,0,Math.PI*2,true);ctx.fill();ctx.restore();
+  ctx.save();ctx.fillStyle='rgba(2,2,12,.92)';ctx.beginPath();ctx.rect(0,0,W,H);ctx.arc(lx,ly,lr,0,Math.PI*2,true);ctx.fill('evenodd');ctx.restore();
   ctx.beginPath();ctx.arc(lx,ly,lr,0,Math.PI*2);ctx.strokeStyle='#8866aa';ctx.lineWidth=5;ctx.stroke();
   ctx.strokeStyle='rgba(180,140,255,.4)';ctx.lineWidth=2;ctx.stroke();
   if(!m2.planetaAchado){ctx.beginPath();ctx.arc(lx,ly,lr,0,Math.PI*2);ctx.strokeStyle=`rgba(100,180,255,${.1+Math.sin(t*.08)*.08})`;ctx.lineWidth=lr*2;ctx.stroke();}
@@ -1059,21 +1059,36 @@ loop();
     if(algumaCutsceneVisivel()) tapSkipCutscene(e);
   }, {passive:false});
 
-  // ── 7. Botão de tela cheia ──
+  // ── 7. Tela cheia persistente entre páginas ──
   const fsBtn = document.getElementById('gz-fullscreen-btn');
+  function entrarFullscreen(){
+    const el = document.documentElement;
+    const p = (el.requestFullscreen && el.requestFullscreen())
+           || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+    if(p && p.then) p.then(()=>sessionStorage.setItem('gz_fs','1')).catch(()=>{});
+    else sessionStorage.setItem('gz_fs','1');
+  }
+  function sairFullscreen(){
+    sessionStorage.removeItem('gz_fs');
+    (document.exitFullscreen && document.exitFullscreen())
+      || (document.webkitExitFullscreen && document.webkitExitFullscreen());
+  }
+  function atualizarIconeFS(){
+    if(!fsBtn) return;
+    fsBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+  }
   if(fsBtn){
     fsBtn.addEventListener('click', function(){
-      const el = document.documentElement;
-      if(!document.fullscreenElement){
-        (el.requestFullscreen && el.requestFullscreen())
-          || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
-      } else {
-        (document.exitFullscreen && document.exitFullscreen())
-          || (document.webkitExitFullscreen && document.webkitExitFullscreen());
-      }
+      document.fullscreenElement ? sairFullscreen() : entrarFullscreen();
     });
-    document.addEventListener('fullscreenchange', ()=>setTimeout(escalarCanvas,150));
-    document.addEventListener('webkitfullscreenchange', ()=>setTimeout(escalarCanvas,150));
+    document.addEventListener('fullscreenchange', ()=>{ atualizarIconeFS(); setTimeout(escalarCanvas,150); });
+    document.addEventListener('webkitfullscreenchange', ()=>{ atualizarIconeFS(); setTimeout(escalarCanvas,150); });
+  }
+  // Reativar fullscreen ao entrar na página se estava ativo antes
+  if(sessionStorage.getItem('gz_fs') === '1' && !document.fullscreenElement){
+    document.addEventListener('DOMContentLoaded', ()=>{
+      setTimeout(()=>{ if(!document.fullscreenElement) entrarFullscreen(); }, 300);
+    }, {once:true});
   }
 })();
 </script>
