@@ -179,13 +179,9 @@ canvas{display:block}
 <script src="audio.js"></script>
 <script>
 const C   = document.getElementById('C');
-const _dpr = window.devicePixelRatio || 1;
-C.width  = 800 * _dpr;
-C.height = 550 * _dpr;
-C.style.width  = '800px';
-C.style.height = '550px';
+C.width  = 800;
+C.height = 550;
 const ctx = C.getContext('2d');
-ctx.scale(_dpr, _dpr);
 const W=800, H=550;
 
 // ── CONSTANTES FÍSICAS ────────────────────────────────

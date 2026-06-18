@@ -259,7 +259,7 @@ canvas{display:block}
 </header>
 
 <div class="canvas-wrapper">
-  <canvas id="gameCanvas" width="800" height="550"></canvas>
+  <canvas id="gameCanvas" width="800" height="550" style="image-rendering:pixelated;image-rendering:crisp-edges;"></canvas>
 
   <!-- ── CUTSCENE ALIADOS ── -->
 <div id="cutscene-aliados" style="display:none;position:absolute;inset:0;z-index:35;background:#000;">
@@ -383,13 +383,9 @@ const _PT = {};
 })();
 
 const canvas = document.getElementById('gameCanvas');
-const _dpr = window.devicePixelRatio || 1;
-canvas.width  = 800 * _dpr;
-canvas.height = 550 * _dpr;
-canvas.style.width  = '800px';
-canvas.style.height = '550px';
+canvas.width  = 800;
+canvas.height = 550;
 const ctx = canvas.getContext('2d');
-ctx.scale(_dpr, _dpr);
 const W = 800, H = 550;
 
 let estadoJogo = "FASE_1_LUTA";
