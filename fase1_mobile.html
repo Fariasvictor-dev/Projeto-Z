@@ -1177,9 +1177,8 @@ loop();
   }
   // Reativar fullscreen ao entrar na página se estava ativo antes
   if(sessionStorage.getItem('gz_fs') === '1' && !document.fullscreenElement){
-    document.addEventListener('DOMContentLoaded', ()=>{
-      setTimeout(()=>{ if(!document.fullscreenElement) entrarFullscreen(); }, 300);
-    }, {once:true});
+    // DOMContentLoaded já disparou (script está no fim do body), usar setTimeout direto
+    setTimeout(()=>{ if(!document.fullscreenElement) entrarFullscreen(); }, 400);
   }
 })();
 </script>
