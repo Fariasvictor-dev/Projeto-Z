@@ -780,7 +780,7 @@ function mostrarEncerramento(){
   bgMus.pause();
   crMus.volume = 1.0;
   crMus.currentTime = 0;
-  crMus.play().catch(()=>{});
+  crMus.play().catch(()=>{});  // best-effort, créditos aparecem de qualquer forma
 
   const CREDITOS = [
     { tipo:'titulo', texto:'✦ MISSÃO CONCLUÍDA ✦' },
@@ -844,7 +844,7 @@ function mostrarEncerramento(){
 
   const overlay = document.createElement('div');
   overlay.id = 'encerramento-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9999;overflow:hidden;opacity:0;transition:opacity 1.4s;';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:2147483647;overflow:hidden;opacity:0;transition:opacity 1.4s;isolation:isolate;';
   overlay.innerHTML = `
     <canvas id="credits-stars" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
     <div id="credits-scroll" style="
@@ -859,7 +859,13 @@ function mostrarEncerramento(){
       <button onclick="reiniciarJogo()" style="font-family:'Press Start 2P',monospace;font-size:9px;background:transparent;border:2px solid #44eebb;color:#44eebb;padding:12px 28px;cursor:pointer;letter-spacing:2px;" onmouseover="this.style.background='rgba(68,238,187,.15)'" onmouseout="this.style.background='transparent'">▶ JOGAR NOVAMENTE</button>
     </div>
   `;
-  document.body.appendChild(overlay);
+  document.documentElement.appendChild(overlay);
+
+  // Esconder controles touch durante os créditos
+  const tcEl = document.getElementById('gz-touch-controls');
+  const tbEl = document.getElementById('gz-top-bar');
+  if(tcEl) tcEl.style.display='none';
+  if(tbEl) tbEl.style.display='none';
 
   const scroll = document.getElementById('credits-scroll');
   const styles = {
