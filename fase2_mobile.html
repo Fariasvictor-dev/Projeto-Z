@@ -617,7 +617,7 @@ function verificarOrdem(ds){
             '⚡ As 3 Leis de Kepler dominadas!<br><br>'+
             '<span style="color:#ff4081">🗺️ MISSÃO 2B — ÓRBITAS ELÍPTICAS — DESBLOQUEADA!</span>';
           document.getElementById('victory-banner').classList.add('visible');
-          document.getElementById('victory-btn').onclick=()=>{GZ_Audio&&GZ_Audio.btnClick();window.location.href='mapa_mobile.html';};
+          document.getElementById('victory-btn').onclick=()=>{GZ_Audio&&GZ_Audio.btnClick();gzIrPara('mapa_mobile.html');};
         }, "JOGADOR");
       },500);
     }
@@ -898,6 +898,18 @@ loop();
       const scale = Math.min(vw / BASE_W, vh / BASE_H);
       wrapper.style.transform = `scale(${scale})`;
     }
+  }
+
+  // Navegar mantendo fullscreen: pede FS no evento de toque, depois navega
+  function gzIrPara(url){
+    const el = document.documentElement;
+    sessionStorage.setItem('gz_fs','1');
+    if(!document.fullscreenElement){
+      const p = (el.requestFullscreen && el.requestFullscreen())
+             || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+      if(p && p.then){ p.then(()=>{ window.location.href=url; }).catch(()=>{ window.location.href=url; }); return; }
+    }
+    window.location.href = url;
   }
   window.addEventListener('resize', escalarCanvas);
   window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));

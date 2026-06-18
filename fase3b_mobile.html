@@ -357,7 +357,7 @@ function mostrarResultado(titulo, texto, vitoria){
     const btn=ov.querySelector('.ov-btn');
     if(vitoria){
       btn.textContent='✓ CONTINUAR';
-      btn.onclick=()=>{ const p=carregarProgresso();p.fase3b_completa=true;salvarProgresso(p);window.location.href='mapa_mobile.html'; };
+      btn.onclick=()=>{ const p=carregarProgresso();p.fase3b_completa=true;salvarProgresso(p);gzIrPara('mapa_mobile.html'); };
     } else if(tentativas>=maxTentativas){
       btn.textContent='↺ RECOMEÇAR';
       btn.onclick=()=>{ tentativas=0;ov.classList.remove('visible');estado='AJUSTE';bala=null;rastro=[];};
@@ -739,6 +739,18 @@ loop();
       const scale = Math.min(vw / BASE_W, vh / BASE_H);
       wrapper.style.transform = `scale(${scale})`;
     }
+  }
+
+  // Navegar mantendo fullscreen: pede FS no evento de toque, depois navega
+  function gzIrPara(url){
+    const el = document.documentElement;
+    sessionStorage.setItem('gz_fs','1');
+    if(!document.fullscreenElement){
+      const p = (el.requestFullscreen && el.requestFullscreen())
+             || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+      if(p && p.then){ p.then(()=>{ window.location.href=url; }).catch(()=>{ window.location.href=url; }); return; }
+    }
+    window.location.href = url;
   }
   window.addEventListener('resize', escalarCanvas);
   window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));

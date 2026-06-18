@@ -936,7 +936,7 @@ function iniciarMissao(idx){
       {quem:"ARISTÓTELES",ouvinte:"JOGADOR",texto:"Alto lá! Eu sou Aristóteles. A Terra é o centro IMÓVEL e PERFEITO do universo. O Geocentrismo é a ORDEM NATURAL das esferas celestes!"},
       {quem:"JOGADOR",ouvinte:"ARISTÓTELES",texto:"Mas as observações mostram outra realidade! O retrógrado de Marte, as fases de Vênus... seus círculos não explicam os dados!"},
       {quem:"ARISTÓTELES",ouvinte:"JOGADOR",texto:"Ousado, herético! Se quer atravessar meu domínio, terá que me vencer em combate científico. EN GARDE!"},
-    ],()=>{ window.location.href='fase1_mobile.html'; },"JOGADOR");
+    ],()=>{ gzIrPara('fase1_mobile.html'); },"JOGADOR");
   } else if(idx===1){
     if(!progresso.missao2_unlocked)
       dispararHistoria([{quem:"SISTEMA",ouvinte:"JOGADOR",texto:"Caminho bloqueado. Complete a Missão 1 primeiro para desbloquear as Leis de Kepler."}],null,"JOGADOR");
@@ -944,7 +944,7 @@ function iniciarMissao(idx){
       dispararHistoria([
         {quem:"NARRADOR",ouvinte:"JOHANNES KEPLER",texto:"Século XVII. Após décadas de cálculos com dados de Tycho Brahe, Johannes Kepler descobre a geometria das órbitas."},
         {quem:"JOHANNES KEPLER",ouvinte:"JOGADOR",texto:"Jovem! Use a LUNETA DE GALILEU para encontrar o planeta escondido. Depois ordene o Sistema Solar — das órbitas elípticas!"},
-      ],()=>{ window.location.href='fase2_mobile.html'; },"JOGADOR");
+      ],()=>{ gzIrPara('fase2_mobile.html'); },"JOGADOR");
     }
   } else if(idx===2){
     // Missão 2B — Órbitas Elípticas (lua)
@@ -954,7 +954,7 @@ function iniciarMissao(idx){
       dispararHistoria([
         {quem:"JOHANNES KEPLER",ouvinte:"JOGADOR",texto:"Agora que entende as órbitas, é hora de as VIVER! Pule de lua em lua navegando as órbitas elípticas do Sistema Solar!"},
         {quem:"NARRADOR",ouvinte:"JOGADOR",texto:"No periélio você acelera, no afélio você abranda — salte no momento certo ou derive para o espaço!"},
-      ],()=>{ window.location.href='fase2b_mobile.html'; },"JOGADOR");
+      ],()=>{ gzIrPara('fase2b_mobile.html'); },"JOGADOR");
 
   } else if(idx===3){
     // Missão 3 — A Maçã de Newton
@@ -964,7 +964,7 @@ function iniciarMissao(idx){
       dispararHistoria([
         {quem:"NARRADOR",ouvinte:"ISAAC NEWTON",texto:"Você chega à Inglaterra, 1666. Uma jovem maçã pende de um galho. Um homem de peruca observa o céu..."},
         {quem:"ISAAC NEWTON",ouvinte:"JOGADOR",texto:"Desvie das maçãs, sobreviva ao experimento da queda dos corpos e responda meu quiz sobre F = G × m₁m₂ / r²!"},
-      ],()=>{ window.location.href='fase3_mobile.html'; },"JOGADOR");
+      ],()=>{ gzIrPara('fase3_mobile.html'); },"JOGADOR");
   }
 }
 
@@ -1144,6 +1144,18 @@ window.addEventListener('keydown', e=>{
       const scale = Math.min(vw / BASE_W, vh / BASE_H);
       wrapper.style.transform = `scale(${scale})`;
     }
+  }
+
+  // Navegar mantendo fullscreen: pede FS no evento de toque, depois navega
+  function gzIrPara(url){
+    const el = document.documentElement;
+    sessionStorage.setItem('gz_fs','1');
+    if(!document.fullscreenElement){
+      const p = (el.requestFullscreen && el.requestFullscreen())
+             || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+      if(p && p.then){ p.then(()=>{ window.location.href=url; }).catch(()=>{ window.location.href=url; }); return; }
+    }
+    window.location.href = url;
   }
   window.addEventListener('resize', escalarCanvas);
   window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));
