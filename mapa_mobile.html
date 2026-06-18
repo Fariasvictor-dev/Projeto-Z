@@ -1101,6 +1101,9 @@ window.addEventListener('keydown', e=>{
   </div>
 </div>
 
+<script>
+function gzIrPara(url){ window.location.href = url; }
+</script>
 <script id="gz-mobile-script">
 (function(){
   // ── 1. Escalonar (e rotacionar em retrato) o canvas-wrapper ──
@@ -1143,9 +1146,6 @@ window.addEventListener('keydown', e=>{
   }
 
   // Navegar mantendo fullscreen: pede FS no evento de toque, depois navega
-  function gzIrPara(url){
-    window.location.href = url;
-  }
   window.addEventListener('resize', escalarCanvas);
   window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));
   document.addEventListener('DOMContentLoaded', escalarCanvas);
