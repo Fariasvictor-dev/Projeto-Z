@@ -774,7 +774,7 @@ function irParaEstacao(){
 }
 
 function mostrarEncerramento(){
-  gameState='ENCERRAMENTO';
+  estadoJogo='ENCERRAMENTO';
   // Trocar música de fundo pela música dos créditos
   const bgMus = document.getElementById('bg-music');
   const crMus = document.getElementById('credits-music');
@@ -976,6 +976,7 @@ function iniciarMissao(idx){
 // ── LOOP PRINCIPAL ─────────────────────────────────────
 let ticks=0;
 function loop(){
+  if(estadoJogo==='ENCERRAMENTO') return; // Para o loop durante os créditos
   ticks++;
   if(dlgCooldown>0) dlgCooldown--;
   ctx.fillStyle='#04040e';ctx.fillRect(0,0,W,H);
