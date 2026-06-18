@@ -27,7 +27,7 @@ header h1{
   color:#ffe566;text-shadow:0 0 10px #ffe566,0 0 22px #ff9900;
 }
 .badge{font-size:.55rem;letter-spacing:.15em;padding:2px 8px;border:1px solid #44eebb;color:#44eebb}
-.canvas-wrapper{position:relative;border:2px solid #1e2a3a;box-shadow:0 0 50px rgba(100,60,220,.18)}
+.canvas-wrapper{position:relative;}
 canvas{display:block}
 .hint{margin-top:8px;font-size:.6rem;color:#4a5a6a;letter-spacing:.1em}
 .back-btn{
@@ -126,231 +126,127 @@ canvas{display:block}
 </style>
 <style id="gz-mobile-style">
   @media (max-width: 880px), (pointer: coarse) {
-    html, body{
-      height: 100vh;
-      height: 100dvh;
+    html, body {
+      width: 100vw; height: 100vh; height: 100dvh;
+      margin: 0; padding: 0; overflow: hidden;
+      background: #000;
     }
-    body{
-      padding: 0 !important;
+    header, .hint, .back-btn, #config-btn { display: none !important; }
+
+    #gz-scale-outer {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important; height: 100dvh !important;
       display: flex !important;
-      flex-direction: column !important;
-      align-items: stretch !important;
-      justify-content: flex-start !important;
-      min-height: 0 !important;
+      align-items: center !important;
+      justify-content: center !important;
       overflow: hidden !important;
+      background: #000 !important;
     }
-    header{
-      margin-top: env(safe-area-inset-top, 6px);
-      transform: scale(0.55);
-      transform-origin: top center;
-      margin-bottom: -14px;
-      flex-shrink: 0;
-      white-space: nowrap;
-      justify-content: center;
+    .canvas-wrapper {
+      position: relative !important;
+      transform-origin: center center !important;
+      flex-shrink: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
     }
-    header h1{ display: none; }
-    .badge{ white-space: nowrap; }
-    .hint{ display:none; }
-    .back-btn{
-      font-size: .42rem !important;
-      padding: 4px 8px !important;
-      top: env(safe-area-inset-top, 6px) !important;
-      left: 6px !important;
-      z-index: 1000 !important;
+
+    /* Controles sobrepostos — NÃO tiram espaço do canvas */
+    #gz-touch-controls {
+      position: fixed !important;
+      bottom: env(safe-area-inset-bottom, 8px) !important;
+      left: 0 !important; right: 0 !important;
+      width: 100vw !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: flex-end !important;
+      padding: 0 14px 8px !important;
+      box-sizing: border-box !important;
+      pointer-events: none !important;
+      z-index: 999 !important;
     }
-    #config-btn{
-      font-size: .42rem !important;
-      padding: 4px 8px !important;
-      top: calc(env(safe-area-inset-top, 6px) + 46px) !important;
-      right: 6px !important;
-      z-index: 998 !important;
+    #gz-touch-controls.hidden { display: none !important; }
+    #gz-touch-controls > * { pointer-events: auto; }
+
+    .gz-dpad {
+      display: grid;
+      grid-template-columns: 52px 52px 52px;
+      grid-template-rows: 52px 52px;
+      gap: 4px;
     }
-    #gz-scale-outer{
-      width: 100%;
-      flex: 1 1 auto;
-      min-height: 0;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      overflow: hidden;
-      position: relative;
-    }
-    .canvas-wrapper{
-      transform-origin: center center;
-      flex-shrink: 0;
-    }
-    #gz-touch-controls{
-      flex-shrink: 0;
-      width: 100%;
-      display:flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 8px calc(6px + env(safe-area-inset-bottom,0px));
-      z-index: 999;
-      gap: 6px;
-      box-sizing: border-box;
-    }
-    #gz-touch-controls.hidden{ display:none; }
-    .gz-dpad{
-      display:grid;
-      grid-template-columns: 46px 46px 46px;
-      grid-template-rows: 46px 46px;
-      gap:4px;
-      pointer-events:auto;
-    }
-    .gz-dpad .gz-btn{ grid-row: 2; }
-    .gz-dpad .gz-up{ grid-row:1; grid-column:2; }
-    .gz-extra{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      pointer-events:auto;
-      align-items:center;
-    }
-    .gz-actions{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      pointer-events:auto;
-      align-items:center;
-    }
-    .gz-btn{
-      width:46px;height:46px;
-      border-radius:14px;
-      border:2px solid #ffe566;
-      background:rgba(10,10,25,.78);
-      color:#ffe566;
-      font-family:'Press Start 2P',monospace;
-      font-size:1rem;
-      display:flex;align-items:center;justify-content:center;
+    .gz-dpad .gz-btn { grid-row: 2; }
+    .gz-dpad .gz-up  { grid-row: 1; grid-column: 2; }
+    .gz-extra  { display:flex; flex-direction:column; gap:6px; align-items:center; }
+    .gz-actions{ display:flex; flex-direction:column; gap:6px; align-items:center; }
+    .gz-btn {
+      width:52px; height:52px; border-radius:14px;
+      border:2px solid #ffe566; background:rgba(10,10,25,.75);
+      color:#ffe566; font-family:'Press Start 2P',monospace; font-size:1.1rem;
+      display:flex; align-items:center; justify-content:center;
       box-shadow:0 0 10px rgba(255,229,100,.25);
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: none;
+      user-select:none; -webkit-tap-highlight-color:transparent; touch-action:none;
     }
-    .gz-btn:active, .gz-btn.gz-pressed{
-      background:rgba(255,229,100,.28);
-      box-shadow:0 0 16px rgba(255,229,100,.6);
+    .gz-btn:active,.gz-btn.gz-pressed{ background:rgba(255,229,100,.28); box-shadow:0 0 16px rgba(255,229,100,.6); }
+    .gz-btn.gz-action   { width:68px;height:68px;border-radius:50%;border-color:#ff6688;color:#ff6688;font-size:.55rem; }
+    .gz-btn.gz-secondary{ width:52px;height:52px;border-radius:50%;border-color:#4488ff;color:#4488ff;font-size:.5rem; }
+
+    #gz-top-bar {
+      position:fixed; top:env(safe-area-inset-top,6px); right:6px;
+      display:flex; gap:6px; z-index:1000;
     }
-    .gz-btn.gz-action{
-      width:64px;height:64px;
-      border-radius:50%;
-      border-color:#ff6688;
-      color:#ff6688;
-      font-size:.55rem;
-    }
-    .gz-btn.gz-secondary{
-      width:46px;height:46px;
-      border-radius:50%;
-      border-color:#4488ff;
-      color:#4488ff;
-      font-size:.5rem;
-    }
-    #gz-top-bar{
-      position: fixed;
-      top: env(safe-area-inset-top, 6px);
-      right: 6px;
-      display: flex;
-      gap: 6px;
-      z-index: 1000;
-    }
-    .gz-esc-top{
-      width:38px;height:38px;
-      border-radius:8px;
-      border:2px solid #888;
-      color:#aaa;
-      background:rgba(10,10,25,.78);
-      font-family:'Press Start 2P',monospace;
-      font-size:.42rem;
+    .gz-esc-top {
+      width:40px;height:40px;border-radius:8px;border:2px solid #888;color:#aaa;
+      background:rgba(10,10,25,.78);font-family:'Press Start 2P',monospace;font-size:.44rem;
       display:flex;align-items:center;justify-content:center;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-      touch-action: none;
+      -webkit-tap-highlight-color:transparent;user-select:none;touch-action:none;
     }
-    .gz-esc-top:active, .gz-esc-top.gz-pressed{
-      background:rgba(255,255,255,.12);
-    }
+    .gz-esc-top:active,.gz-esc-top.gz-pressed{ background:rgba(255,255,255,.12); }
     #gz-fullscreen-btn{
-      width: 38px; height: 38px;
-      border-radius: 8px;
-      border: 2px solid #ffe566;
-      background: rgba(10,10,25,.78);
-      color: #ffe566;
-      font-size: 1.1rem;
+      width:40px;height:40px;border-radius:8px;border:2px solid #ffe566;
+      background:rgba(10,10,25,.78);color:#ffe566;font-size:1.1rem;
       display:flex;align-items:center;justify-content:center;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
+      -webkit-tap-highlight-color:transparent;user-select:none;
     }
-    #dialogue-overlay{ touch-action: none; }
-  }
-  @media (max-width: 400px){
-    .gz-dpad{
-      grid-template-columns: 42px 42px 42px;
-      grid-template-rows: 42px 42px;
-      gap:4px;
-    }
-    .gz-btn{ width:42px; height:42px; font-size:.85rem; }
-    .gz-btn.gz-action{ width:58px; height:58px; font-size:.5rem; }
-    .gz-btn.gz-secondary{ width:42px; height:42px; }
-  }
-  @media (min-width: 881px) and (pointer: fine){
-    #gz-touch-controls{ display:none !important; }
-    #gz-top-bar{ display:none !important; }
+    #dialogue-overlay{ touch-action:none; }
   }
 
-  /* ── MODO PAISAGEM FORÇADO (celular em retrato) ── */
-  body.gz-rotated{
-    overflow: hidden !important;
+  @media (min-width:881px) and (pointer:fine){
+    #gz-touch-controls{ display:none !important; }
+    #gz-top-bar       { display:none !important; }
   }
-  body.gz-rotated header,
-  body.gz-rotated .back-btn,
-  body.gz-rotated #config-btn,
-  body.gz-rotated .hint{
-    display: none !important;
+
+  /* MODO RETRATO: gira 90° e preenche tudo */
+  body.gz-rotated { overflow:hidden !important; background:#000 !important; }
+  body.gz-rotated header, body.gz-rotated .back-btn,
+  body.gz-rotated #config-btn, body.gz-rotated .hint { display:none !important; }
+  body.gz-rotated #gz-scale-outer {
+    position:fixed !important; inset:0 !important;
+    width:100vw !important; height:100vh !important; height:100dvh !important;
+    padding:0 !important; flex:none !important; background:#000 !important;
   }
-  body.gz-rotated #gz-scale-outer{
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    flex: none !important;
-    box-sizing: border-box !important;
-    padding-left: 70px !important;
-    padding-right: 46px !important;
+  body.gz-rotated .canvas-wrapper { transform-origin:center center !important; }
+  body.gz-rotated #gz-touch-controls {
+    position:fixed !important; flex-direction:column !important;
+    justify-content:space-between !important;
+    bottom:0 !important; width:auto !important;
+    height:100vh !important; height:100dvh !important;
+    padding:12px 8px 12px 6px !important;
+    box-sizing:border-box !important; gap:0 !important; z-index:999 !important;
+    pointer-events:none !important;
   }
-  body.gz-rotated .canvas-wrapper{
-    transform-origin: center center;
-  }
-  body.gz-rotated #gz-touch-controls{
-    position: fixed !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    left: auto !important;
-    bottom: 0 !important;
-    width: auto !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    padding: calc(8px + env(safe-area-inset-top,0px)) 8px calc(8px + env(safe-area-inset-bottom,0px)) 6px !important;
-    box-sizing: border-box !important;
-    gap: 0 !important;
-    z-index: 999;
-  }
-  /* lado esquerdo (D-pad) fica na borda física esquerda do celular */
-  body.gz-rotated.gz-rot-cw #gz-touch-controls{ left:0 !important; right:auto !important; }
+  body.gz-rotated #gz-touch-controls > * { pointer-events:auto; }
+  body.gz-rotated.gz-rot-cw  #gz-touch-controls{ left:0 !important; right:auto !important; }
   body.gz-rotated.gz-rot-ccw #gz-touch-controls{ right:0 !important; left:auto !important; }
-  body.gz-rotated .gz-dpad{
-    grid-template-columns: 34px 34px 34px;
-    grid-template-rows: 34px 34px;
-    gap:3px;
-  }
-  body.gz-rotated .gz-btn{ width:34px; height:34px; font-size:.7rem; border-radius:10px; }
-  body.gz-rotated .gz-btn.gz-action{ width:46px; height:46px; font-size:.42rem; }
-  body.gz-rotated .gz-btn.gz-secondary{ width:34px; height:34px; }
+  body.gz-rotated .gz-dpad{ grid-template-columns:40px 40px 40px; grid-template-rows:40px 40px; gap:3px; }
+  body.gz-rotated .gz-btn{ width:40px;height:40px;font-size:.8rem;border-radius:10px; }
+  body.gz-rotated .gz-btn.gz-action   { width:56px;height:56px;font-size:.46rem; }
+  body.gz-rotated .gz-btn.gz-secondary{ width:40px;height:40px; }
   body.gz-rotated #gz-top-bar{
-    top: 6px !important;
-    right: 6px !important;
+    top:auto !important; bottom:6px !important; flex-direction:column; gap:6px;
   }
+  body.gz-rotated.gz-rot-cw  #gz-top-bar{ right:6px !important; left:auto !important; }
+  body.gz-rotated.gz-rot-ccw #gz-top-bar{ left:6px !important; right:auto !important; }
 </style>
 </head>
 <body>
@@ -1040,7 +936,7 @@ loop();
 <script id="gz-mobile-script">
 (function(){
   // ── 1. Escalonar (e rotacionar em retrato) o canvas-wrapper ──
-  function escalarCanvas(){
+    function escalarCanvas(){
     const wrapper = document.querySelector('.canvas-wrapper');
     if(!wrapper) return;
     let outer = document.getElementById('gz-scale-outer');
@@ -1052,50 +948,29 @@ loop();
     }
 
     const isMobile = window.matchMedia('(max-width: 880px), (pointer: coarse)').matches;
-
     if(!isMobile){
       document.body.classList.remove('gz-rotated','gz-rot-cw','gz-rot-ccw');
       wrapper.style.transform = '';
       return;
     }
 
-    // mede o tamanho "natural" do wrapper (sem escala/rotação aplicada)
-    const prevTransform = wrapper.style.transform;
-    wrapper.style.transform = 'none';
-    const baseW = wrapper.offsetWidth || 800;
-    const baseH = wrapper.offsetHeight || 550;
-
+    // canvas lógico sempre 800x550 (DPR já foi aplicado no atributo width/height)
+    const BASE_W = 800, BASE_H = 550;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const isPortrait = vh > vw;
 
     if(isPortrait){
-      // Gira o jogo 90° para usar a tela como paisagem
       document.body.classList.add('gz-rotated','gz-rot-cw');
       document.body.classList.remove('gz-rot-ccw');
-      // após rotação de 90°, a largura disponível = altura da viewport,
-      // e a altura disponível = largura da viewport menos margens p/ controles
-      const reservedLeft = 70;  // D-pad
-      const reservedRight = 46; // R / ENT / SOCO
-      const availW = vh - 4;
-      const availH = (vw - reservedLeft - reservedRight) - 4;
-      const scaleX = availW / baseW;
-      const scaleY = availH / baseH;
-      wrapper.style.transform = `rotate(90deg) scale(${scaleX}, ${scaleY})`;
-      wrapper._gzScaleX = scaleX;
-      wrapper._gzScaleY = scaleY;
-      wrapper._gzRotated = true;
+      // Após rotação 90°: eixo W cobre vh, eixo H cobre vw
+      const scale = Math.min(vh / BASE_W, vw / BASE_H);
+      wrapper.style.transform = `rotate(90deg) scale(${scale})`;
     } else {
       document.body.classList.remove('gz-rotated','gz-rot-cw','gz-rot-ccw');
-      wrapper._gzRotated = false;
-      const outerRect = outer.getBoundingClientRect();
-      const availW = (outerRect.width || vw) - 4;
-      const availH = (outerRect.height || vh) - 4;
-      const scaleX = availW / baseW;
-      const scaleY = availH / baseH;
-      wrapper.style.transform = `scale(${scaleX}, ${scaleY})`;
-      wrapper._gzScaleX = scaleX;
-      wrapper._gzScaleY = scaleY;
+      // Escala uniforme: preenche o máximo sem distorcer
+      const scale = Math.min(vw / BASE_W, vh / BASE_H);
+      wrapper.style.transform = `scale(${scale})`;
     }
   }
   window.addEventListener('resize', escalarCanvas);
