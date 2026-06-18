@@ -260,7 +260,7 @@ canvas{display:block}
 <a class="back-btn" href="mapa_mobile.html">◀ MAPA</a>
 <header><h1>GRAVITAÇÃO Z</h1><span class="badge">FASE 2B · ÓRBITAS ELÍPTICAS</span></header>
 <div class="canvas-wrapper">
-  <canvas id="GC" width="800" height="550"></canvas>
+  <canvas id="GC" style="image-rendering:pixelated;image-rendering:crisp-edges;" width="800" height="550"></canvas>
   <div id="OVL">
     <div class="ob">
       <div class="ot" id="OT">🪐 ÓRBITAS</div>
@@ -274,7 +274,13 @@ canvas{display:block}
 <script>
 // ── SETUP ─────────────────────────────────────────────
 const GC = document.getElementById('GC');
+const _dpr = window.devicePixelRatio || 1;
+GC.width  = 800 * _dpr;
+GC.height = 550 * _dpr;
+GC.style.width  = '800px';
+GC.style.height = '550px';
 const ctx = GC.getContext('2d');
+ctx.scale(_dpr, _dpr);
 const W=800, H=550;
 
 // Estrelas

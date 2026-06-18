@@ -260,7 +260,7 @@ canvas{display:block}
 <a class="back-btn" href="mapa_mobile.html" onclick="GZ_Audio&&GZ_Audio.btnClick()">◀ MAPA</a>
 <header><h1>GRAVITAÇÃO Z</h1><span class="badge">FASE 3B · O CANHÃO DE NEWTON</span></header>
 <div class="canvas-wrapper">
-  <canvas id="C" width="800" height="550"></canvas>
+  <canvas id="C" style="image-rendering:pixelated;image-rendering:crisp-edges;" width="800" height="550"></canvas>
   <div id="overlay">
     <div class="ov-box" id="ov-inner">
       <div class="ov-title" id="ov-title">🍎 O CANHÃO DE NEWTON</div>
@@ -283,7 +283,13 @@ canvas{display:block}
 <script src="audio.js"></script>
 <script>
 const C   = document.getElementById('C');
+const _dpr = window.devicePixelRatio || 1;
+C.width  = 800 * _dpr;
+C.height = 550 * _dpr;
+C.style.width  = '800px';
+C.style.height = '550px';
 const ctx = C.getContext('2d');
+ctx.scale(_dpr, _dpr);
 const W=800, H=550;
 
 // ── CONSTANTES FÍSICAS ────────────────────────────────

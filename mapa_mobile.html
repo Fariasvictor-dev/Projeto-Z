@@ -526,8 +526,14 @@ input[type=range].cfg-slider::-moz-range-thumb{
 <script src="audio.js"></script>
 <script>
 const canvas = document.getElementById('gameCanvas');
-const ctx    = canvas.getContext('2d');
-const W = canvas.width, H = canvas.height;
+const _dpr = window.devicePixelRatio || 1;
+canvas.width  = 800 * _dpr;
+canvas.height = 550 * _dpr;
+canvas.style.width  = '800px';
+canvas.style.height = '550px';
+const ctx = canvas.getContext('2d');
+ctx.scale(_dpr, _dpr);
+const W = 800, H = 550;
 
 let estadoJogo = "MAPA";
 let estadoAnteriorDialogo = "MAPA";

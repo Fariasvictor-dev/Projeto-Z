@@ -519,8 +519,14 @@
 <script src="audio.js"></script>
 <script>
 const canvas=document.getElementById('gameCanvas');
+const _dpr = window.devicePixelRatio || 1;
+canvas.width  = 800 * _dpr;
+canvas.height = 550 * _dpr;
+canvas.style.width  = '800px';
+canvas.style.height = '550px';
 const ctx=canvas.getContext('2d');
-const W=canvas.width,H=canvas.height;
+ctx.scale(_dpr, _dpr);
+const W=800,H=550;
 
 let estadoJogo="MISSAO_2";
 let estadoAnteriorDialogo="MISSAO_2";
@@ -868,15 +874,7 @@ window.addEventListener('keydown', e=>{
 });
 
 // Tentar reproduzir (autoplay policy)
-introVid.play().catch(()=>{
-  const tapOverlay = document.createElement('div');
-  tapOverlay.style.cssText = 'position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.6);cursor:pointer;';
-  tapOverlay.innerHTML = '<div style="font-family:\'Press Start 2P\',monospace;color:#ffe566;font-size:.7rem;text-align:center;line-height:2.2;text-shadow:0 0 12px #ffe566;">&#9654; TOQUE PARA<br>INICIAR</div>';
-  introDiv.appendChild(tapOverlay);
-  const startPlay = ()=>{ tapOverlay.remove(); introVid.play().catch(()=>fecharCutsceneIntro()); };
-  tapOverlay.addEventListener('pointerdown', startPlay, {once:true});
-  tapOverlay.addEventListener('click', startPlay, {once:true});
-});
+introVid.play().catch(()=>{ fecharCutsceneIntro(); });
 
 // ── FUNÇÃO CUTSCENE PÓS DRAG4 ───────────────────────────
 function tocarCutsceneDrag4(callback){
@@ -886,15 +884,7 @@ function tocarCutsceneDrag4(callback){
 
   div.style.display='flex';
   vid.currentTime=0;
-  vid.play().catch(()=>{
-    const tapOverlay2 = document.createElement('div');
-    tapOverlay2.style.cssText = 'position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.6);cursor:pointer;';
-    tapOverlay2.innerHTML = '<div style="font-family:\'Press Start 2P\',monospace;color:#ffe566;font-size:.7rem;text-align:center;line-height:2.2;text-shadow:0 0 12px #ffe566;">&#9654; TOQUE PARA<br>CONTINUAR</div>';
-    div.appendChild(tapOverlay2);
-    const startPlay2 = ()=>{ tapOverlay2.remove(); vid.play().catch(()=>fecharCutsceneDrag4(callback)); };
-    tapOverlay2.addEventListener('pointerdown', startPlay2, {once:true});
-    tapOverlay2.addEventListener('click', startPlay2, {once:true});
-  });
+  vid.play().catch(()=>{ fecharCutsceneDrag4(callback); });
 
   function fecharCutsceneDrag4(cb){
     div.style.opacity='0';
