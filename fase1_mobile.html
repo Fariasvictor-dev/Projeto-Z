@@ -972,14 +972,17 @@ loop();
 
   // Navegar mantendo fullscreen: pede FS no evento de toque, depois navega
   function gzIrPara(url){
-    const el = document.documentElement;
+    // Navega sempre — fullscreen é best-effort, não bloqueia navegação
     sessionStorage.setItem('gz_fs','1');
-    if(!document.fullscreenElement){
-      const p = (el.requestFullscreen && el.requestFullscreen())
-             || (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
-      if(p && p.then){ p.then(()=>{ window.location.href=url; }).catch(()=>{ window.location.href=url; }); return; }
-    }
-    window.location.href = url;
+    const el = document.documentElement;
+    try {
+      if(!document.fullscreenElement){
+        (el.requestFullscreen && el.requestFullscreen()) ||
+        (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+      }
+    } catch(e){}
+    // Garante navegação mesmo se fullscreen travar
+    setTimeout(()=>{ window.location.href = url; }, 80);
   }
   window.addEventListener('resize', escalarCanvas);
   window.addEventListener('orientationchange', ()=>setTimeout(escalarCanvas,200));
